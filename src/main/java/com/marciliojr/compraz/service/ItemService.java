@@ -5,6 +5,7 @@ import com.marciliojr.compraz.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,10 @@ public class ItemService {
         return itemRepository.findAll().stream()
                 .map(item ->  ItemDTO.construirComAtributosBasicos(item.getNome(), item.getQuantidade(), item.getUnidade(), item.getValorUnitario()))
                 .collect(Collectors.toList());
+    }
+
+    public List<ItemDTO> listarItensPorDataEstabelecimento(String nomeEstabelecimento, LocalDate data){
+        return itemRepository.findAllItemsByEstabelecimentoAndDataCompra(nomeEstabelecimento,data);
     }
 
 }
