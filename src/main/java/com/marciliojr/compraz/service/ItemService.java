@@ -22,8 +22,9 @@ public class ItemService {
                 .collect(Collectors.toList());
     }
 
-    public List<ItemDTO> listarItensPorDataEstabelecimento(String nomeEstabelecimento, LocalDate data){
-        return itemRepository.findAllItemsByEstabelecimentoAndDataCompra(nomeEstabelecimento,data);
+    public List<ItemDTO> listarItensPorEstabelecimentoEPeriodo(String nomeEstabelecimento, LocalDate dataInicio, LocalDate dataFim) {
+        return itemRepository.findAllItemsByEstabelecimentoAndPeriodo(nomeEstabelecimento, dataInicio, dataFim);
     }
+
 
 }

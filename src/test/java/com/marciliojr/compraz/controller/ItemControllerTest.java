@@ -4,18 +4,22 @@ import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.service.ItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.OK;
 
+@ExtendWith(MockitoExtension.class)
 class ItemControllerTest {
 
     @Mock
@@ -24,28 +28,27 @@ class ItemControllerTest {
     @InjectMocks
     private ItemController itemController;
 
+    private ItemDTO itemDTO;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        itemDTO = new ItemDTO(1L, "Feijão", BigDecimal.valueOf(2), "kg", BigDecimal.valueOf(10), LocalDate.now(), "Mercado");
     }
 
     @Test
-    void deveRetornarListaVaziaSeNaoHouverItens() {
-        when(itemService.listarItensPorDataEstabelecimento("Mercado", LocalDate.of(2024, 1, 10)))
-                .thenReturn(Collections.emptyList());
+    void buscarItensPorEstabelecimentoEPeriodo_DeveRetornarListaDeItens() {
+        String nomeEstabelecimento = "Mercado";
+        String dataInicio = "2023-01-01";
+        String dataFim = "2023-12-31";
 
-        ResponseEntity<List<ItemDTO>> resposta = itemController.buscarItensPorEstabelecimentoEData("Mercado", "2024-01-10");
+        when(itemService.listarItensPorEstabelecimentoEPeriodo(eq(nomeEstabelecimento), any(), any()))
+                .thenReturn(Arrays.asList(itemDTO));
 
-        assertEquals(200, resposta.getStatusCodeValue());
-        assertNotNull(resposta.getBody());
-        assertTrue(resposta.getBody().isEmpty());
-    }
+        ResponseEntity<List<ItemDTO>> response = itemController.buscarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, dataInicio, dataFim);
 
-    @Test
-    void deveRetornarErroParaDataInvalida() {
-        ResponseEntity<List<ItemDTO>> resposta = itemController.buscarItensPorEstabelecimentoEData("Mercado", "data-invalida");
-
-        assertEquals(400, resposta.getStatusCodeValue());
-        assertNull(resposta.getBody());
+        assertEquals(OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+        assertEquals("Feijão", response.getBody().get(0).getNome());
+        verify(itemService, times(1)).listarItensPorEstabelecimentoEPeriodo(eq(nomeEstabelecimento), any(), any());
     }
 }

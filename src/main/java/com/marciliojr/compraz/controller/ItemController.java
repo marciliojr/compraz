@@ -22,41 +22,23 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    /**
-     * Construtor para injeção de dependência do serviço de itens.
-     *
-     * @param itemService Serviço responsável pelas operações relacionadas aos itens.
-     */
     @Autowired
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
-    /**
-     * Endpoint para buscar itens com base no nome do estabelecimento e na data de compra.
-     *
-     * @param nomeEstabelecimento O nome do estabelecimento onde os itens foram comprados.
-     * @param dataCompra          A data da compra no formato ISO (ex.: "2025-01-01").
-     * @return Uma lista de objetos {@link ItemDTO} representando os itens encontrados.
-     *         Retorna uma resposta HTTP 400 se houver erro nos parâmetros de entrada.
-     */
     @GetMapping("/itens")
-    public ResponseEntity<List<ItemDTO>> buscarItensPorEstabelecimentoEData(
+    public ResponseEntity<List<ItemDTO>> buscarItensPorEstabelecimentoEPeriodo(
             @RequestParam String nomeEstabelecimento,
-            @RequestParam String dataCompra) {
-        try {
-            LocalDate data = LocalDate.parse(dataCompra);
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim) {
 
-            List<ItemDTO> itens = itemService.listarItensPorDataEstabelecimento(nomeEstabelecimento, data);
+        LocalDate inicio = (dataInicio != null && !dataInicio.isEmpty()) ? LocalDate.parse(dataInicio) : null;
+        LocalDate fim = (dataFim != null && !dataFim.isEmpty()) ? LocalDate.parse(dataFim) : null;
 
-            return ResponseEntity.ok(itens);
+        List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, inicio, fim);
 
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.badRequest().body(null);
-
-        } catch (Exception e) {
-
-            return ResponseEntity.badRequest().body(null);
-        }
+        return ResponseEntity.ok(itens);
     }
+
 }
