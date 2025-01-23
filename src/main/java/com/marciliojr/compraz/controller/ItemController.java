@@ -9,15 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 import static com.marciliojr.compraz.infra.ComprazUtils.parseDate;
 import static com.marciliojr.compraz.infra.ComprazUtils.sanitizeString;
 
-/**
- * Controlador REST responsável por expor endpoints relacionados aos itens.
- */
 @RestController
 @RequestMapping("/api/item")
 public class ItemController {
@@ -42,5 +40,18 @@ public class ItemController {
         List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, inicio, fim);
 
         return ResponseEntity.ok(itens);
+    }
+    @GetMapping("/soma-valor-unitario")
+    public ResponseEntity<BigDecimal> somarValorUnitarioPorEstabelecimentoEPeriodo(
+            @RequestParam String nomeEstabelecimento,
+            @RequestParam(required = false) String dataInicio,
+            @RequestParam(required = false) String dataFim) {
+
+        LocalDate inicio = (dataInicio != null && !dataInicio.isEmpty()) ? LocalDate.parse(dataInicio) : null;
+        LocalDate fim = (dataFim != null && !dataFim.isEmpty()) ? LocalDate.parse(dataFim) : null;
+
+        BigDecimal soma = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo(nomeEstabelecimento, inicio, fim);
+
+        return ResponseEntity.ok(soma);
     }
 }

@@ -1,5 +1,6 @@
 package com.marciliojr.compraz.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,6 +23,19 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "WHERE (:nomeEstabelecimento IS NULL OR e.nomeEstabelecimento = :nomeEstabelecimento) " +
             "AND (:dataInicio IS NULL OR :dataFim IS NULL OR c.dataCompra BETWEEN :dataInicio AND :dataFim)")
     List<ItemDTO> findAllItemsByEstabelecimentoAndPeriodo(
+            @Param("nomeEstabelecimento") String nomeEstabelecimento,
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim
+    );
+
+    @Query("SELECT COALESCE(SUM(i.valorUnitario), 0) " +
+            "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
+            "WHERE e.nomeEstabelecimento = :nomeEstabelecimento " +
+            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
+            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)")
+    BigDecimal sumValorUnitarioByEstabelecimentoAndPeriodo(
             @Param("nomeEstabelecimento") String nomeEstabelecimento,
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim

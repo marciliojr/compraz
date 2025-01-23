@@ -9,11 +9,14 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class b {
+class PDFControllerTest {
 
     @Mock
     private PDFDataService pdfDataService;
@@ -31,7 +34,7 @@ class b {
         MultipartFile file = mock(MultipartFile.class);
         when(file.isEmpty()).thenReturn(true);
 
-        ResponseEntity<String> resposta = pdfController.uploadPDF(file, "Mercado");
+        ResponseEntity<String> resposta = pdfController.uploadPDF(file, "Mercado", LocalDate.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
         assertEquals(400, resposta.getStatusCodeValue());
         assertEquals("Erro: Arquivo não enviado ou está vazio.", resposta.getBody());
@@ -42,7 +45,7 @@ class b {
         MultipartFile file = mock(MultipartFile.class);
         when(file.isEmpty()).thenReturn(false);
 
-        ResponseEntity<String> resposta = pdfController.uploadPDF(file, "");
+        ResponseEntity<String> resposta = pdfController.uploadPDF(file, "", LocalDate.now().format(DateTimeFormatter.ISO_DATE_TIME));
 
         assertEquals(400, resposta.getStatusCodeValue());
         assertEquals("Erro: Nome do estabelecimento não fornecido.", resposta.getBody());

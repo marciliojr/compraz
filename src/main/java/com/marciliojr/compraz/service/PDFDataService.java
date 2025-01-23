@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Objects.isNull;
+
 @Service
 public class PDFDataService {
 
@@ -26,14 +28,14 @@ public class PDFDataService {
 
     private static final String ITEM_REGEX = "(.*?)\\s+\\(Código: \\d+\\)\\s+Qtde\\.:\\s+(\\d+,?\\d*)\\s+UN:\\s+(\\w+)\\s+Vl\\. Unit\\.:\\s+(\\d+,\\d+)";
 
-    public void processarDadosEPersistir(String textoPDF, String nomeEstabelecimento) {
+    public void processarDadosEPersistir(String textoPDF, String nomeEstabelecimento, LocalDate dataCadastro) {
         if (isTextoVazioOuNulo(textoPDF, "Erro: O texto do PDF está vazio ou nulo.") ||
                 isTextoVazioOuNulo(nomeEstabelecimento, "Erro: O nome do estabelecimento está vazio ou nulo.")) {
             return;
         }
 
         Estabelecimento estabelecimento = salvarEstabelecimento(nomeEstabelecimento);
-        Compra compra = criarCompra(estabelecimento);
+        Compra compra = criarCompra(estabelecimento, dataCadastro);
         List<Item> itens = extrairItensDoTexto(textoPDF, compra);
 
         if (!itens.isEmpty()) {
@@ -51,9 +53,9 @@ public class PDFDataService {
         return estabelecimentoRepository.save(estabelecimento);
     }
 
-    private Compra criarCompra(Estabelecimento estabelecimento) {
+    private Compra criarCompra(Estabelecimento estabelecimento, LocalDate dataCadastro) {
         Compra compra = new Compra();
-        compra.setDataCompra(LocalDate.now());
+        compra.setDataCompra(isNull(dataCadastro)?LocalDate.now():dataCadastro);
         compra.setEstabelecimento(estabelecimento);
         return compra;
     }
