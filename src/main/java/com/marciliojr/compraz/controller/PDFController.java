@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+import static com.marciliojr.compraz.infra.ComprazUtils.parseDate;
+
 /**
  * Controlador REST para manipulação de arquivos PDF e processamento de dados extraídos.
  */
@@ -25,14 +27,15 @@ public class PDFController {
     /**
      * Endpoint para upload de arquivos PDF.
      *
-     * @param file               O arquivo PDF enviado pelo cliente.
+     * @param file                O arquivo PDF enviado pelo cliente.
      * @param nomeEstabelecimento O nome do estabelecimento associado ao PDF.
      * @return Uma mensagem indicando o status do processamento.
      */
     @PostMapping("/upload")
     public ResponseEntity<String> uploadPDF(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("nomeEstabelecimento") String nomeEstabelecimento) {
+            @RequestParam("nomeEstabelecimento") String nomeEstabelecimento,
+            @RequestParam("dataCadastro") String dataCadastro) {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Erro: Arquivo não enviado ou está vazio.");
@@ -44,9 +47,8 @@ public class PDFController {
         }
 
         try {
-            // Extrai texto do PDF e processa os dados
             String textoPDF = pdfExtractor.extrairTextoPDF(pdfExtractor.converterParaArquivo(file));
-            pdfDataService.processarDadosEPersistir(textoPDF, nomeEstabelecimento);
+            pdfDataService.processarDadosEPersistir(textoPDF, nomeEstabelecimento, parseDate(dataCadastro));
 
             return ResponseEntity.status(HttpStatus.OK).body("Dados salvos com sucesso!");
         } catch (IOException e) {

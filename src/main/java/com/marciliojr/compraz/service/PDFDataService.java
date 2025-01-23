@@ -15,9 +15,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Serviço responsável por processar dados extraídos de um PDF e persistir informações de compras, estabelecimentos e itens no banco de dados.
- */
+import static java.util.Objects.isNull;
+
 @Service
 public class PDFDataService {
 
@@ -29,20 +28,14 @@ public class PDFDataService {
 
     private static final String ITEM_REGEX = "(.*?)\\s+\\(Código: \\d+\\)\\s+Qtde\\.:\\s+(\\d+,?\\d*)\\s+UN:\\s+(\\w+)\\s+Vl\\. Unit\\.:\\s+(\\d+,\\d+)";
 
-    /**
-     * Processa o texto extraído de um PDF e salva os dados de compra e itens no banco de dados.
-     *
-     * @param textoPDF             O texto extraído do PDF.
-     * @param nomeEstabelecimento  O nome do estabelecimento relacionado à compra.
-     */
-    public void processarDadosEPersistir(String textoPDF, String nomeEstabelecimento) {
+    public void processarDadosEPersistir(String textoPDF, String nomeEstabelecimento, LocalDate dataCadastro) {
         if (isTextoVazioOuNulo(textoPDF, "Erro: O texto do PDF está vazio ou nulo.") ||
                 isTextoVazioOuNulo(nomeEstabelecimento, "Erro: O nome do estabelecimento está vazio ou nulo.")) {
             return;
         }
 
         Estabelecimento estabelecimento = salvarEstabelecimento(nomeEstabelecimento);
-        Compra compra = criarCompra(estabelecimento);
+        Compra compra = criarCompra(estabelecimento, dataCadastro);
         List<Item> itens = extrairItensDoTexto(textoPDF, compra);
 
         if (!itens.isEmpty()) {
@@ -54,38 +47,19 @@ public class PDFDataService {
         }
     }
 
-    /**
-     * Salva um novo estabelecimento no banco de dados.
-     *
-     * @param nome Nome do estabelecimento.
-     * @return Entidade do estabelecimento salva.
-     */
     private Estabelecimento salvarEstabelecimento(String nome) {
         Estabelecimento estabelecimento = new Estabelecimento();
         estabelecimento.setNomeEstabelecimento(nome);
         return estabelecimentoRepository.save(estabelecimento);
     }
 
-    /**
-     * Cria uma nova compra associada a um estabelecimento.
-     *
-     * @param estabelecimento Estabelecimento relacionado à compra.
-     * @return Entidade de compra criada.
-     */
-    private Compra criarCompra(Estabelecimento estabelecimento) {
+    private Compra criarCompra(Estabelecimento estabelecimento, LocalDate dataCadastro) {
         Compra compra = new Compra();
-        compra.setDataCompra(LocalDate.now());
+        compra.setDataCompra(isNull(dataCadastro)?LocalDate.now():dataCadastro);
         compra.setEstabelecimento(estabelecimento);
         return compra;
     }
 
-    /**
-     * Extrai os itens do texto do PDF usando o regex definido.
-     *
-     * @param textoPDF Texto do PDF a ser processado.
-     * @param compra   Compra à qual os itens serão associados.
-     * @return Lista de itens extraídos.
-     */
     private List<Item> extrairItensDoTexto(String textoPDF, Compra compra) {
         Pattern pattern = Pattern.compile(ITEM_REGEX);
         Matcher matcher = pattern.matcher(textoPDF);
@@ -115,13 +89,6 @@ public class PDFDataService {
         return itens;
     }
 
-    /**
-     * Verifica se o texto fornecido está vazio ou nulo e exibe uma mensagem de erro se necessário.
-     *
-     * @param texto    Texto a ser validado.
-     * @param mensagem Mensagem de erro a ser exibida caso o texto esteja inválido.
-     * @return {@code true} se o texto estiver vazio ou nulo, caso contrário {@code false}.
-     */
     private boolean isTextoVazioOuNulo(String texto, String mensagem) {
         if (texto == null || texto.trim().isEmpty()) {
             System.err.println(mensagem);
