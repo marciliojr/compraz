@@ -2,6 +2,7 @@ package com.marciliojr.compraz.controller;
 
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.service.ItemService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,16 +30,18 @@ public class ItemController {
 
     @GetMapping("/itens")
     public ResponseEntity<List<ItemDTO>> buscarItensPorEstabelecimentoEPeriodo(
-            @RequestParam String nomeEstabelecimento,
+            @RequestParam(required = false) String nomeEstabelecimento,
             @RequestParam(required = false) String dataInicio,
             @RequestParam(required = false) String dataFim) {
 
-        LocalDate inicio = (dataInicio != null && !dataInicio.isEmpty()) ? LocalDate.parse(dataInicio) : null;
-        LocalDate fim = (dataFim != null && !dataFim.isEmpty()) ? LocalDate.parse(dataFim) : null;
+        LocalDate inicio = (dataInicio != null && !"null".equalsIgnoreCase(dataInicio)) ? LocalDate.parse(dataInicio) : null;
+        LocalDate fim = (dataFim != null && !"null".equalsIgnoreCase(dataFim)) ? LocalDate.parse(dataFim) : null;
+        nomeEstabelecimento = ("null".equalsIgnoreCase(nomeEstabelecimento) || nomeEstabelecimento.trim().isEmpty()) ? null : nomeEstabelecimento;
 
         List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, inicio, fim);
 
         return ResponseEntity.ok(itens);
     }
+
 
 }
