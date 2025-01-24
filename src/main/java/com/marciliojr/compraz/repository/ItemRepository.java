@@ -32,9 +32,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "FROM Item i " +
             "JOIN i.compra c " +
             "JOIN c.estabelecimento e " +
-            "WHERE e.nomeEstabelecimento = :nomeEstabelecimento " +
-            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
-            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)")
+            "WHERE (:nomeEstabelecimento IS NULL OR e.nomeEstabelecimento = :nomeEstabelecimento) " +
+            "AND (:dataInicio IS NOT NULL AND c.dataCompra >= :dataInicio OR :dataInicio IS NULL) " +
+            "AND (:dataFim IS NOT NULL AND c.dataCompra <= :dataFim OR :dataFim IS NULL)")
     BigDecimal sumValorUnitarioByEstabelecimentoAndPeriodo(
             @Param("nomeEstabelecimento") String nomeEstabelecimento,
             @Param("dataInicio") LocalDate dataInicio,
