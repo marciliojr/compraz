@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query("SELECT new com.marciliojr.compraz.model.dto.ItemDTO(" +
-            "i.id, i.nome, i.quantidade, i.unidade, i.valorUnitario, " +
+            "i.id, i.nome, i.quantidade, i.unidade,i.valorTotal, i.valorUnitario, " +
             "c.dataCompra, e.nomeEstabelecimento) " +
             "FROM Item i " +
             "JOIN i.compra c " +
@@ -28,19 +28,18 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             @Param("dataFim") LocalDate dataFim
     );
 
-    @Query("SELECT COALESCE(SUM(i.valorUnitario), 0) " +
+    @Query("SELECT COALESCE(SUM(i.valorTotal), 0) " +
             "FROM Item i " +
             "JOIN i.compra c " +
             "JOIN c.estabelecimento e " +
             "WHERE (:nomeEstabelecimento IS NULL OR e.nomeEstabelecimento = :nomeEstabelecimento) " +
             "AND (:dataInicio IS NOT NULL AND c.dataCompra >= :dataInicio OR :dataInicio IS NULL) " +
             "AND (:dataFim IS NOT NULL AND c.dataCompra <= :dataFim OR :dataFim IS NULL)")
-    BigDecimal sumValorUnitarioByEstabelecimentoAndPeriodo(
+    BigDecimal sumValorTotalByEstabelecimentoAndPeriodo(
             @Param("nomeEstabelecimento") String nomeEstabelecimento,
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim
     );
-
 
 
 }

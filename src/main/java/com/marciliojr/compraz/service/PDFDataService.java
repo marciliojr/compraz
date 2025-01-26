@@ -30,7 +30,7 @@ public class PDFDataService {
     @Autowired
     private EstabelecimentoRepository estabelecimentoRepository;
 
-    private static final String ITEM_REGEX = "(.*?)\\s*\\(Código:\\s*\\d+\\)\\s*Qtde\\.:\\s*(\\d+[,.]?\\d*)\\s*UN:\\s*(\\w+)\\s*Vl\\. Unit\\.:\\s*(\\d+,\\d+)";
+    private static final String ITEM_REGEX = "(.*?)\\s*\\(Código:\\s*\\d+\\)\\s*Qtde\\.:\\s*(\\d+[,.]?\\d*)\\s*UN:\\s*(\\w+)\\s*Vl\\. Unit\\.:\\s*(\\d+[,.]?\\d+)\\s*Vl\\. Total\\s*(\\d+[,.]?\\d+)";
 
     public void processarDadosEPersistir(String textoPDF, String nomeEstabelecimento, LocalDate dataCadastro) {
         if (isTextoVazioOuNulo(textoPDF, "Erro: O texto do PDF está vazio ou nulo.") ||
@@ -84,6 +84,7 @@ public class PDFDataService {
                 BigDecimal quantidade = new BigDecimal(nf.parse(matcher.group(2)).toString());
                 String unidade = matcher.group(3).trim();
                 BigDecimal valorUnitario = new BigDecimal(nf.parse(matcher.group(4)).toString());
+                BigDecimal valorTotal = new BigDecimal(nf.parse(matcher.group(5)).toString());
 
                 Item item = new Item();
                 item.setNome(nome);
@@ -91,6 +92,7 @@ public class PDFDataService {
                 item.setUnidade(unidade);
                 item.setValorUnitario(valorUnitario);
                 item.setCompra(compra);
+                item.setValorTotal(valorTotal);
 
                 itens.add(item);
                 logger.info("Item processado: {}, Qtde: {}, UN: {}, Valor Unit.: {}", nome, quantidade, unidade, valorUnitario);

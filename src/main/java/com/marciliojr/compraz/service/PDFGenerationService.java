@@ -32,7 +32,7 @@ public class PDFGenerationService {
                     .setFontColor(ColorConstants.BLACK));
 
             // Define a tabela com o número de colunas
-            float[] columnWidths = {3, 2, 2, 3,2};
+            float[] columnWidths = {3, 2, 2, 3, 2, 2};
             Table table = new Table(columnWidths);
             table.setWidth(UnitValue.createPercentValue(100));
 
@@ -41,6 +41,7 @@ public class PDFGenerationService {
             table.addHeaderCell(new Cell().add(new Paragraph("Quantidade")).setBold());
             table.addHeaderCell(new Cell().add(new Paragraph("Unidade")).setBold());
             table.addHeaderCell(new Cell().add(new Paragraph("Valor Unitário")).setBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Valor Total")).setBold());
             table.addHeaderCell(new Cell().add(new Paragraph("Estabelecimento")).setBold());
 
             // Adiciona os dados dos itens
@@ -49,6 +50,7 @@ public class PDFGenerationService {
                 table.addCell(new Cell().add(new Paragraph(item.getQuantidade().toString())));
                 table.addCell(new Cell().add(new Paragraph(item.getUnidade())));
                 table.addCell(new Cell().add(new Paragraph("R$ " + item.getValorUnitario())));
+                table.addCell(new Cell().add(new Paragraph("R$ " + item.getValorTotal())));
                 table.addCell(new Cell().add(new Paragraph(item.getNomeEstabelecimento())));
             }
 
