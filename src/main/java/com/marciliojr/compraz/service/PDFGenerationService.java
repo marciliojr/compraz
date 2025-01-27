@@ -28,8 +28,7 @@ public class PDFGenerationService {
             // Adiciona o título
             document.add(new Paragraph("Relatório de Compras")
                     .setFontSize(14)
-                    .setBold()
-                    .setFontColor(ColorConstants.BLACK));
+                    .setFontColor(ColorConstants.BLACK).simulateBold());
 
             // Define a tabela com o número de colunas
             float[] columnWidths = {3, 2, 2, 3, 2, 2};
@@ -37,12 +36,12 @@ public class PDFGenerationService {
             table.setWidth(UnitValue.createPercentValue(100));
 
             // Cabeçalhos da tabela
-            table.addHeaderCell(new Cell().add(new Paragraph("Nome do Item")).setBold());
-            table.addHeaderCell(new Cell().add(new Paragraph("Quantidade")).setBold());
-            table.addHeaderCell(new Cell().add(new Paragraph("Unidade")).setBold());
-            table.addHeaderCell(new Cell().add(new Paragraph("Valor Unitário")).setBold());
-            table.addHeaderCell(new Cell().add(new Paragraph("Valor Total")).setBold());
-            table.addHeaderCell(new Cell().add(new Paragraph("Estabelecimento")).setBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Nome do Item")).simulateBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Quantidade")).simulateBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Unidade")).simulateBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Valor Unitário")).simulateBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Valor Total")).simulateBold());
+            table.addHeaderCell(new Cell().add(new Paragraph("Estabelecimento")).simulateBold());
 
             // Adiciona os dados dos itens
             for (ItemDTO item : items) {
