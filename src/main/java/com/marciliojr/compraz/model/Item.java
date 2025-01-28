@@ -28,9 +28,25 @@ public class Item {
     @Column(name = "valor_unitario", nullable = false, precision = 10, scale = 2)
     private BigDecimal valorUnitario;
 
+    @Column(name = "valor_total", nullable = false, precision = 10, scale = 2)
+    private BigDecimal valorTotal;
+
     @ManyToOne
     @JoinColumn(name = "compra_id", nullable = false)
     private Compra compra;
+
+    public Item() {
+    }
+
+    public Item(Long id, String nome, BigDecimal quantidade, String unidade, BigDecimal valorUnitario, BigDecimal valorTotal, Compra compra) {
+        this.id = id;
+        this.nome = nome;
+        this.quantidade = quantidade;
+        this.unidade = unidade;
+        this.valorUnitario = valorUnitario;
+        this.valorTotal = valorTotal;
+        this.compra = compra;
+    }
 
     public Long getId() {
         return id;
@@ -72,6 +88,14 @@ public class Item {
         this.valorUnitario = valorUnitario;
     }
 
+    public BigDecimal getValorTotal() {
+        return valorTotal;
+    }
+
+    public void setValorTotal(BigDecimal valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
     public Compra getCompra() {
         return compra;
     }
@@ -84,23 +108,12 @@ public class Item {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Item item = (Item) o;
-        return Objects.equals(id, item.id) && Objects.equals(nome, item.nome) && Objects.equals(quantidade, item.quantidade) && Objects.equals(unidade, item.unidade) && Objects.equals(valorUnitario, item.valorUnitario) && Objects.equals(compra, item.compra);
+        return Objects.equals(id, item.id) && Objects.equals(nome, item.nome) && Objects.equals(quantidade, item.quantidade) && Objects.equals(unidade, item.unidade) && Objects.equals(valorUnitario, item.valorUnitario) && Objects.equals(valorTotal, item.valorTotal) && Objects.equals(compra, item.compra);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nome, quantidade, unidade, valorUnitario, compra);
+        return Objects.hash(id, nome, quantidade, unidade, valorUnitario, valorTotal, compra);
     }
 
-    @Override
-    public String toString() {
-        return "Item{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", quantidade=" + quantidade +
-                ", unidade='" + unidade + '\'' +
-                ", valorUnitario=" + valorUnitario +
-                ", compra=" + compra +
-                '}';
-    }
 }

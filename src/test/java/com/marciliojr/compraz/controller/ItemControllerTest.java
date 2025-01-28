@@ -2,12 +2,14 @@ package com.marciliojr.compraz.controller;
 
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.service.ItemService;
+import com.marciliojr.compraz.service.PDFGenerationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -15,9 +17,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpStatus.OK;
 
 @ExtendWith(MockitoExtension.class)
 class ItemControllerTest {
@@ -25,30 +26,45 @@ class ItemControllerTest {
     @Mock
     private ItemService itemService;
 
+    @Mock
+    private PDFGenerationService pdfGenerationService;
+
     @InjectMocks
     private ItemController itemController;
 
-    private ItemDTO itemDTO;
+    private List<ItemDTO> mockItems;
 
     @BeforeEach
     void setUp() {
-        itemDTO = new ItemDTO(1L, "Feijão", BigDecimal.valueOf(2), "kg", BigDecimal.valueOf(10), LocalDate.now(), "Mercado");
+        mockItems = Arrays.asList(
+                new ItemDTO(1L, "Arroz", BigDecimal.valueOf(5), "Kg", BigDecimal.valueOf(10), BigDecimal.valueOf(50), LocalDate.of(2024, 1, 20), "Mercado X"),
+                new ItemDTO(2L, "Feijão", BigDecimal.valueOf(2), "Kg", BigDecimal.valueOf(8), BigDecimal.valueOf(16), LocalDate.of(2024, 1, 21), "Mercado Y")
+        );
     }
 
     @Test
     void buscarItensPorEstabelecimentoEPeriodo_DeveRetornarListaDeItens() {
-        String nomeEstabelecimento = "Mercado";
-        String dataInicio = "2023-01-01";
-        String dataFim = "2023-12-31";
+        when(itemService.listarItensPorEstabelecimentoEPeriodo("Mercado X", null, null)).thenReturn(mockItems);
 
-        when(itemService.listarItensPorEstabelecimentoEPeriodo(eq(nomeEstabelecimento), any(), any()))
-                .thenReturn(Arrays.asList(itemDTO));
+        ResponseEntity<List<ItemDTO>> response = itemController.buscarItensPorEstabelecimentoEPeriodo("Mercado X", null, null);
 
-        ResponseEntity<List<ItemDTO>> response = itemController.buscarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, dataInicio, dataFim);
-
-        assertEquals(OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size());
-        assertEquals("Feijão", response.getBody().get(0).getNome());
-        verify(itemService, times(1)).listarItensPorEstabelecimentoEPeriodo(eq(nomeEstabelecimento), any(), any());
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().size());
+        verify(itemService, times(1)).listarItensPorEstabelecimentoEPeriodo("Mercado X", null, null);
     }
+
+    @Test
+    void somarValorUnitarioPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
+        when(itemService.somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", null, null)).thenReturn(BigDecimal.valueOf(100));
+
+        ResponseEntity<BigDecimal> response = itemController.somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", null, null);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(BigDecimal.valueOf(100), response.getBody());
+        verify(itemService, times(1)).somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", null, null);
+    }
+
+
 }

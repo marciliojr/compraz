@@ -1,5 +1,6 @@
 package com.marciliojr.compraz.service;
 
+import com.marciliojr.compraz.model.Compra;
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
@@ -12,10 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,43 +28,49 @@ class ItemServiceTest {
     @InjectMocks
     private ItemService itemService;
 
-    private Item item;
+    private Item item1, item2;
+    private Compra compra;
 
     @BeforeEach
     void setUp() {
-        item = new Item();
-        item.setId(1L);
-        item.setNome("Arroz");
-        item.setQuantidade(BigDecimal.valueOf(5));
-        item.setUnidade("kg");
-        item.setValorUnitario(BigDecimal.valueOf(20));
+        compra = new Compra();
+        compra.setDataCompra(LocalDate.of(2024, 1, 20));
+
+        item1 = new Item(1L, "Arroz", BigDecimal.valueOf(5), "Kg", BigDecimal.valueOf(10), BigDecimal.valueOf(50), compra);
+        item2 = new Item(2L, "Feijão", BigDecimal.valueOf(2), "Kg", BigDecimal.valueOf(8), BigDecimal.valueOf(16), compra);
     }
 
     @Test
-    void listarTodos_DeveRetornarListaDeItens() {
-        when(itemRepository.findAll()).thenReturn(Arrays.asList(item));
+    void listarTodos_DeveRetornarListaDeItensDTO() {
+        when(itemRepository.findAll()).thenReturn(Arrays.asList(item1, item2));
 
-        List<ItemDTO> result = itemService.listarTodos();
+        List<ItemDTO> resultado = itemService.listarTodos();
 
-        assertEquals(1, result.size());
-        assertEquals("Arroz", result.get(0).getNome());
+        assertEquals(2, resultado.size());
+        assertEquals("Arroz", resultado.get(0).getNome());
+        assertEquals("Feijão", resultado.get(1).getNome());
+
         verify(itemRepository, times(1)).findAll();
     }
 
     @Test
-    void listarItensPorEstabelecimentoEPeriodo_DeveRetornarListaFiltrada() {
-        String estabelecimento = "Mercado";
-        LocalDate dataInicio = LocalDate.of(2023, 1, 1);
-        LocalDate dataFim = LocalDate.of(2023, 12, 31);
-        ItemDTO itemDTO = new ItemDTO(1L, "Arroz", BigDecimal.valueOf(5), "kg", BigDecimal.valueOf(20), LocalDate.now(), estabelecimento);
+    void listarItensPorEstabelecimentoEPeriodo_DeveRetornarItensFiltrados() {
+        when(itemRepository.findAllItemsByEstabelecimentoAndPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)))
+                .thenReturn(Arrays.asList(new ItemDTO(1L, "Arroz", BigDecimal.valueOf(5), "Kg", BigDecimal.valueOf(10), BigDecimal.valueOf(50), LocalDate.of(2024, 1, 20), "Mercado X")));
 
-        when(itemRepository.findAllItemsByEstabelecimentoAndPeriodo(estabelecimento, dataInicio, dataFim))
-                .thenReturn(Arrays.asList(itemDTO));
+        List<ItemDTO> resultado = itemService.listarItensPorEstabelecimentoEPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
 
-        List<ItemDTO> result = itemService.listarItensPorEstabelecimentoEPeriodo(estabelecimento, dataInicio, dataFim);
+        assertEquals(1, resultado.size());
+        assertEquals("Arroz", resultado.get(0).getNome());
+    }
 
-        assertEquals(1, result.size());
-        assertEquals("Arroz", result.get(0).getNome());
-        verify(itemRepository, times(1)).findAllItemsByEstabelecimentoAndPeriodo(estabelecimento, dataInicio, dataFim);
+    @Test
+    void somarValorUnitarioPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
+        when(itemRepository.sumValorTotalByEstabelecimentoAndPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)))
+                .thenReturn(BigDecimal.valueOf(100));
+
+        BigDecimal resultado = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
+
+        assertEquals(BigDecimal.valueOf(100), resultado);
     }
 }

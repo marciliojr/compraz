@@ -18,6 +18,15 @@ public class Estabelecimento {
     @Column(nullable = false)
     private String nomeEstabelecimento;
 
+
+    public Estabelecimento() {
+    }
+
+    public Estabelecimento(Long id, String nomeEstabelecimento) {
+        this.id = id;
+        this.nomeEstabelecimento = nomeEstabelecimento;
+    }
+
     public Long getId() {
         return id;
     }

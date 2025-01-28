@@ -10,9 +10,6 @@ import java.util.Optional;
 public class ComprazUtils {
 
 
-    /**
-     * Converte uma string para LocalDate, retornando null se o valor for inválido.
-     */
     public static LocalDate parseDate(String dateStr) {
         return Optional.ofNullable(dateStr)
                 .map(String::trim)
@@ -27,9 +24,6 @@ public class ComprazUtils {
                 .orElse(null);
     }
 
-    /**
-     * Sanitiza strings para evitar valores nulos ou "null".
-     */
     public static String sanitizeString(String value) {
         return Optional.ofNullable(value)
                 .map(String::trim)

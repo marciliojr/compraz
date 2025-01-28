@@ -9,15 +9,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class PDFDataProcessorTest {
 
     @Test
-    void deveProcessarPDFDataComSucesso() {
-        String textoMock = "Produto Teste (Código: 123) Qtde.: 2 UN: kg Vl. Unit.: 10,50";
+    void processPDFData_DeveExtrairInformacoesCorretamente() {
+        String textoPDF = "Arroz (Código: 12345) Qtde.: 2.00 UN: Kg Vl. Unit.: 10.00 Vl. Total 20.00";
 
-        ByteArrayOutputStream saidaCapturada = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(saidaCapturada));
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
 
-        PDFDataProcessor.processPDFData(textoMock);
+        PDFDataProcessor.processPDFData(textoPDF);
 
-        String resultado = saidaCapturada.toString().trim();
-        assertTrue(resultado.contains("Produto: Produto Teste, Qtde: 2, UN: kg, Valor Unitário: 10,50"));
+        String output = outContent.toString();
+
+        assertTrue(output.contains("Produto: Arroz"));
+        assertTrue(output.contains("Qtde: 2.00"));
+        assertTrue(output.contains("UN: Kg"));
+        assertTrue(output.contains("Valor Unitário: 10.00"));
+
+        System.setOut(System.out);
     }
 }

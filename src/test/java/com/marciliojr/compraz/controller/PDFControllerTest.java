@@ -1,21 +1,28 @@
 package com.marciliojr.compraz.controller;
 
+import com.marciliojr.compraz.infra.PDFExtractor;
 import com.marciliojr.compraz.service.PDFDataService;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class PDFControllerTest {
 
     @Mock
@@ -24,30 +31,51 @@ class PDFControllerTest {
     @InjectMocks
     private PDFController pdfController;
 
+    private PDFExtractor pdfExtractor;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        pdfExtractor = new PDFExtractor();
     }
 
     @Test
-    void deveRetornarErroSeArquivoVazio() {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.isEmpty()).thenReturn(true);
+    void uploadPDF_DeveRetornarErroSeArquivoEstiverVazio() {
+        MockMultipartFile emptyFile = new MockMultipartFile("file", new byte[0]);
 
-        ResponseEntity<String> resposta = pdfController.uploadPDF(file, "Mercado", LocalDate.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        ResponseEntity<String> response = pdfController.uploadPDF(emptyFile, "Mercado X", "2024-01-25");
 
-        assertEquals(400, resposta.getStatusCodeValue());
-        assertEquals("Erro: Arquivo não enviado ou está vazio.", resposta.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Erro: Arquivo não enviado ou está vazio.", response.getBody());
     }
 
     @Test
-    void deveRetornarErroSeNomeEstabelecimentoVazio() {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.isEmpty()).thenReturn(false);
+    void uploadPDF_DeveRetornarErroSeNomeEstabelecimentoForVazio() {
+        MockMultipartFile file = new MockMultipartFile("file", "teste.pdf", "application/pdf", new byte[]{1, 2, 3});
 
-        ResponseEntity<String> resposta = pdfController.uploadPDF(file, "", LocalDate.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        ResponseEntity<String> response = pdfController.uploadPDF(file, "", "2024-01-25");
 
-        assertEquals(400, resposta.getStatusCodeValue());
-        assertEquals("Erro: Nome do estabelecimento não fornecido.", resposta.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Erro: Nome do estabelecimento não fornecido.", response.getBody());
+    }
+
+
+    @Test
+    void uploadPDF_DeveRetornarErroSeProcessamentoFalhar() throws IOException {
+        MockMultipartFile file = new MockMultipartFile("file", "teste.pdf", "application/pdf", "Texto de teste".getBytes());
+
+        doThrow(new RuntimeException("Erro inesperado")).when(pdfDataService).processarDadosEPersistir(any(), any(), any());
+
+        ResponseEntity<String> response = pdfController.uploadPDF(file, "Mercado X", "2024-01-25");
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertTrue(response.getBody().contains("Erro inesperado"));
+    }
+
+    @Test
+    void testeConexao_DeveRetornarMensagemDeSucesso() {
+        ResponseEntity<String> response = pdfController.testeConexao();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("API funcionando corretamente.", response.getBody());
     }
 }

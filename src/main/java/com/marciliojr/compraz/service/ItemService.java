@@ -19,7 +19,7 @@ public class ItemService {
 
     public List<ItemDTO> listarTodos() {
         return itemRepository.findAll().stream()
-                .map(item ->  ItemDTO.construirComAtributosBasicos(item.getNome(), item.getQuantidade(), item.getUnidade(), item.getValorUnitario(), item.getCompra().getDataCompra()))
+                .map(item ->  ItemDTO.construirComAtributosBasicos(item.getNome(), item.getQuantidade(), item.getUnidade(), item.getValorTotal(), item.getValorUnitario() ,item.getCompra().getDataCompra()))
                 .collect(Collectors.toList());
     }
 
@@ -28,7 +28,7 @@ public class ItemService {
     }
 
     public BigDecimal somarValorUnitarioPorEstabelecimentoEPeriodo(String nomeEstabelecimento, LocalDate dataInicio, LocalDate dataFim) {
-        return itemRepository.sumValorUnitarioByEstabelecimentoAndPeriodo(nomeEstabelecimento, dataInicio, dataFim);
+        return itemRepository.sumValorTotalByEstabelecimentoAndPeriodo(nomeEstabelecimento, dataInicio, dataFim);
     }
 
 
