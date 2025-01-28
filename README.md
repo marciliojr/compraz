@@ -29,7 +29,7 @@ O projeto segue uma **arquitetura em camadas**, utilizando **Spring Boot** e **J
 - **Hibernate**
 - **Apache PDFBox** (extração de texto de PDFs)
 - **Maven** (gerenciamento de dependências)
-- **Banco de Dados H2/PostgreSQL** (configuração ajustável)
+- **Banco de Dados H2/MariaDB** (configuração ajustável)
 
 ## 🚀 Como Executar o Projeto
 
