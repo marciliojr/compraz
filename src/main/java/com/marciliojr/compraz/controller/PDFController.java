@@ -12,9 +12,6 @@ import java.io.IOException;
 
 import static com.marciliojr.compraz.infra.ComprazUtils.parseDate;
 
-/**
- * Controlador REST para manipulação de arquivos PDF e processamento de dados extraídos.
- */
 @RestController
 @RequestMapping("/api/pdf")
 public class PDFController {
@@ -24,13 +21,6 @@ public class PDFController {
 
     private final PDFExtractor pdfExtractor = new PDFExtractor();
 
-    /**
-     * Endpoint para upload de arquivos PDF.
-     *
-     * @param file                O arquivo PDF enviado pelo cliente.
-     * @param nomeEstabelecimento O nome do estabelecimento associado ao PDF.
-     * @return Uma mensagem indicando o status do processamento.
-     */
     @PostMapping("/upload")
     public ResponseEntity<String> uploadPDF(
             @RequestParam("file") MultipartFile file,
@@ -60,11 +50,6 @@ public class PDFController {
         }
     }
 
-    /**
-     * Endpoint para teste de conexão ou disponibilidade.
-     *
-     * @return Uma mensagem de teste.
-     */
     @GetMapping("/teste")
     public ResponseEntity<String> testeConexao() {
         return ResponseEntity.status(HttpStatus.OK).body("API funcionando corretamente.");
