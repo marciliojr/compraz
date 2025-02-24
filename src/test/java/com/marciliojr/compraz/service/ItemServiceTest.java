@@ -1,6 +1,7 @@
 package com.marciliojr.compraz.service;
 
 import com.marciliojr.compraz.model.Compra;
+import com.marciliojr.compraz.model.Estabelecimento;
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
@@ -30,11 +31,16 @@ class ItemServiceTest {
 
     private Item item1, item2;
     private Compra compra;
+    private   Estabelecimento estabelecimento;
 
     @BeforeEach
     void setUp() {
+
+        estabelecimento =  new Estabelecimento("Estabelecimento X");
+
         compra = new Compra();
         compra.setDataCompra(LocalDate.of(2024, 1, 20));
+        compra.setEstabelecimento(estabelecimento);
 
         item1 = new Item(1L, "Arroz", BigDecimal.valueOf(5), "Kg", BigDecimal.valueOf(10), BigDecimal.valueOf(50), compra);
         item2 = new Item(2L, "Feijão", BigDecimal.valueOf(2), "Kg", BigDecimal.valueOf(8), BigDecimal.valueOf(16), compra);
