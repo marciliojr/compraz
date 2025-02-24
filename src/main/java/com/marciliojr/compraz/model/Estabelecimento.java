@@ -22,6 +22,10 @@ public class Estabelecimento {
     public Estabelecimento() {
     }
 
+    public Estabelecimento(String nomeEstabelecimento) {
+        this.nomeEstabelecimento = nomeEstabelecimento;
+    }
+
     public Estabelecimento(Long id, String nomeEstabelecimento) {
         this.id = id;
         this.nomeEstabelecimento = nomeEstabelecimento;

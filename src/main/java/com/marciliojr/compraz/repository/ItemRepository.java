@@ -1,15 +1,15 @@
 package com.marciliojr.compraz.repository;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -40,6 +40,18 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim
     );
+
+    @Query("SELECT new com.marciliojr.compraz.model.dto.ItemDTO(" +
+            "i.id, i.nome, i.quantidade, i.unidade, i.valorTotal, i.valorUnitario, " +
+            "c.dataCompra, e.nomeEstabelecimento) " +
+            "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
+            "WHERE (:nome IS NULL OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) " +
+            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
+            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)")
+    List<ItemDTO> findByNomeByPeriodo(String nome, LocalDate dataInicio, LocalDate dataFim);
+
 
 
 }

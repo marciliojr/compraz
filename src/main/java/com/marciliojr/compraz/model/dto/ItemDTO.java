@@ -29,6 +29,21 @@ public class ItemDTO {
         this.nomeEstabelecimento = nomeEstabelecimento;
     }
 
+    public static ItemDTO construir(String nome, BigDecimal quantidade, String unidade,
+                                    BigDecimal valorTotal, BigDecimal valorUnitario,
+                                    LocalDate dataCompra, String nomeEstabelecimento) {
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setNome(nome);
+        itemDTO.setQuantidade(quantidade);
+        itemDTO.setUnidade(unidade);
+        itemDTO.setValorTotal(valorTotal);
+        itemDTO.setValorUnitario(valorUnitario);
+        itemDTO.setDataCompra(dataCompra);
+        itemDTO.setNomeEstabelecimento(nomeEstabelecimento);
+        return itemDTO;
+    }
+
+
     public Long getId() {
         return id;
     }
