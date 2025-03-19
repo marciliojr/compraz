@@ -3,7 +3,6 @@ package com.marciliojr.compraz.service;
 import com.marciliojr.compraz.model.Compra;
 import com.marciliojr.compraz.model.Estabelecimento;
 import com.marciliojr.compraz.model.Item;
-import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -12,14 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Disabled
@@ -33,7 +24,7 @@ class ItemServiceTest {
 
     private Item item1, item2;
     private Compra compra;
-    private   Estabelecimento estabelecimento;
+    private Estabelecimento estabelecimento;
 
     @BeforeEach
     void setUp() {
@@ -73,7 +64,7 @@ class ItemServiceTest {
     }
 
     @Test
-    void somarValorUnitarioPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
+    void somarValorTotalPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
 //        when(itemRepository.sumValorTotalByEstabelecimentoAndPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)))
 //                .thenReturn(BigDecimal.valueOf(100));
 //

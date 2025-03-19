@@ -10,15 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Disabled
@@ -56,7 +49,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void somarValorUnitarioPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
+    void somarValorTotalPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
 //        when(itemService.somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", null, null)).thenReturn(BigDecimal.valueOf(100));
 //
 //        ResponseEntity<BigDecimal> response = itemController.somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", null, null);

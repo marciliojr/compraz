@@ -23,23 +23,22 @@ import java.util.Objects;
 import static com.marciliojr.compraz.infra.ComprazUtils.sanitizeString;
 
 @RestController
-@RequestMapping("/api/item")
+@RequestMapping("/api/cupom")
 public class ItemController {
 
     private final ItemService itemService;
+    @Autowired
+    private PDFGeradorProdutos pdfGeradorProdutos;
 
     @Autowired
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 
-    @Autowired
-    private PDFGeradorProdutos pdfGeradorProdutos;
-
     @GetMapping("/itens")
     public ResponseEntity<List<ItemDTO>> buscarItensPorEstabelecimentoEPeriodo(
             @RequestParam(required = false) String nomeEstabelecimento,
-            @RequestParam int tipoCupom,
+            @RequestParam(required = false) Integer tipoCupom,
             @RequestParam(required = false) LocalDate dataInicio,
             @RequestParam(required = false) LocalDate dataFim) {
 
@@ -50,14 +49,30 @@ public class ItemController {
         return ResponseEntity.ok(itens);
     }
 
-    @GetMapping("/soma-valor-unitario")
-    public ResponseEntity<BigDecimal> somarValorUnitarioPorEstabelecimentoEPeriodo(
+    @GetMapping("/produtos")
+    public ResponseEntity<List<ItemDTO>> buscarItensPorNomeProdutoEstabelecimentoTipoEPeriodo(
+            @RequestParam(required = false) String nomeProduto,
+            @RequestParam(required = false) String nomeEstabelecimento,
+            @RequestParam(required = false) Integer tipoCupom,
+            @RequestParam(required = false) LocalDate dataInicio,
+            @RequestParam(required = false) LocalDate dataFim) {
+
+        nomeProduto = sanitizeString(nomeProduto);
+        nomeEstabelecimento = sanitizeString(nomeEstabelecimento);
+
+        List<ItemDTO> itens = itemService.listarItensPorNomeEPeriodo(nomeProduto, Objects.requireNonNullElse(TipoCupom.obterPorCodigo(tipoCupom), TipoCupom.OUTROS), dataInicio, dataFim, nomeEstabelecimento);
+
+        return ResponseEntity.ok(itens);
+    }
+
+    @GetMapping("/soma-valor-total")
+    public ResponseEntity<BigDecimal> somarValorTotalPorEstabelecimentoEPeriodo(
             @RequestParam String nomeEstabelecimento,
             @RequestParam int tipoCupom,
             @RequestParam(required = false) LocalDate dataInicio,
             @RequestParam(required = false) LocalDate dataFim) {
 
-        BigDecimal soma = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo(StringUtils.trimToNull(nomeEstabelecimento), TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
+        BigDecimal soma = itemService.somarValorTotalPorEstabelecimentoEPeriodo(StringUtils.trimToNull(nomeEstabelecimento), TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
 
         return ResponseEntity.ok(soma);
     }
@@ -74,7 +89,7 @@ public class ItemController {
         try {
             List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
 
-            BigDecimal valorSomatorio = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo(nomeEstabelecimento, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
+            BigDecimal valorSomatorio = itemService.somarValorTotalPorEstabelecimentoEPeriodo(nomeEstabelecimento, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
 
             byte[] pdfBytes = pdfGeradorProdutos.generatePDF(itens, Objects.requireNonNullElse(valorSomatorio.toString(), "0.00"));
 

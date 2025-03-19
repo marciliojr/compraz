@@ -49,7 +49,7 @@ public class ItemService {
         return itemRepository.findByCompraId(compraId);
     }
 
-    public BigDecimal somarValorUnitarioPorEstabelecimentoEPeriodo(String nomeEstabelecimento, TipoCupom tipoCupom, LocalDate dataInicio, LocalDate dataFim) {
+    public BigDecimal somarValorTotalPorEstabelecimentoEPeriodo(String nomeEstabelecimento, TipoCupom tipoCupom, LocalDate dataInicio, LocalDate dataFim) {
         return itemRepository.sumValorTotalByEstabelecimentoAndPeriodo(nomeEstabelecimento, tipoCupom, dataInicio, dataFim);
     }
 
