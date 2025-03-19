@@ -16,13 +16,10 @@ public class PDFExtractor {
         }
 
         try (PDDocument document = PDDocument.load(pdfFile)) {
-            // Inicializa o objeto para extração de texto
             PDFTextStripper pdfStripper = new PDFTextStripper();
 
-            // Extrai o texto do documento
             String text = pdfStripper.getText(document);
 
-            // Retorna o texto extraído
             return text;
         } catch (IOException e) {
             System.err.println("Erro ao ler o arquivo PDF: " + e.getMessage());
@@ -35,14 +32,8 @@ public class PDFExtractor {
         if (multipartFile == null || multipartFile.isEmpty()) {
             throw new IllegalArgumentException("O MultipartFile está vazio ou é nulo.");
         }
-
-        // Cria um arquivo temporário no sistema
         File tempFile = File.createTempFile("upload_", "_" + multipartFile.getOriginalFilename());
-
-        // Transfere o conteúdo do MultipartFile para o arquivo temporário
         multipartFile.transferTo(tempFile);
-
-        // Retorna o arquivo temporário
         return tempFile;
     }
 }

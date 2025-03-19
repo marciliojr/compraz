@@ -1,16 +1,12 @@
 package com.marciliojr.compraz.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
 @Table(name = "itens")
-@Getter
-@Setter
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -115,5 +111,4 @@ public class Item {
     public int hashCode() {
         return Objects.hash(id, nome, quantidade, unidade, valorUnitario, valorTotal, compra);
     }
-
 }

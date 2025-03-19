@@ -6,17 +6,28 @@ import java.util.Objects;
 
 public class CompraDTO {
 
+    private Long id;
     private String nomeEstabelecimento;
-    private LocalDate dataCompra;  // ou Date
-    private BigDecimal valorTotal;         // ou BigDecimal
+    private LocalDate dataCompra;
+    private BigDecimal valorTotal;
 
-    public CompraDTO(String nomeEstabelecimento, LocalDate dataCompra, BigDecimal valorTotal) {
+    public CompraDTO() {
+    }
+
+
+    public CompraDTO(Long id, String nomeEstabelecimento, LocalDate dataCompra, BigDecimal valorTotal) {
+        this.id = id;
         this.nomeEstabelecimento = nomeEstabelecimento;
         this.dataCompra = dataCompra;
         this.valorTotal = valorTotal;
     }
 
-    public CompraDTO() {
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getNomeEstabelecimento() {
@@ -47,18 +58,19 @@ public class CompraDTO {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         CompraDTO compraDTO = (CompraDTO) o;
-        return Objects.equals(nomeEstabelecimento, compraDTO.nomeEstabelecimento) && Objects.equals(dataCompra, compraDTO.dataCompra) && Objects.equals(valorTotal, compraDTO.valorTotal);
+        return Objects.equals(id, compraDTO.id) && Objects.equals(nomeEstabelecimento, compraDTO.nomeEstabelecimento) && Objects.equals(dataCompra, compraDTO.dataCompra) && Objects.equals(valorTotal, compraDTO.valorTotal);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nomeEstabelecimento, dataCompra, valorTotal);
+        return Objects.hash(id, nomeEstabelecimento, dataCompra, valorTotal);
     }
 
     @Override
     public String toString() {
         return "CompraDTO{" +
-                "nomeEstabelecimento='" + nomeEstabelecimento + '\'' +
+                "id=" + id +
+                ", nomeEstabelecimento='" + nomeEstabelecimento + '\'' +
                 ", dataCompra=" + dataCompra +
                 ", valorTotal=" + valorTotal +
                 '}';

@@ -29,6 +29,19 @@ public class ItemDTO {
         this.nomeEstabelecimento = nomeEstabelecimento;
     }
 
+    public ItemDTO(String nome, BigDecimal quantidade, String unidade,
+                   BigDecimal valorTotal, BigDecimal valorUnitario,
+                   LocalDate dataCompra, String nomeEstabelecimento) {
+        this.nome = nome;
+        this.quantidade = quantidade;
+        this.unidade = unidade;
+        this.valorTotal = valorTotal;
+        this.valorUnitario = valorUnitario;
+        this.dataCompra = dataCompra;
+        this.nomeEstabelecimento = nomeEstabelecimento;
+    }
+
+
     public static ItemDTO construir(String nome, BigDecimal quantidade, String unidade,
                                     BigDecimal valorTotal, BigDecimal valorUnitario,
                                     LocalDate dataCompra, String nomeEstabelecimento) {

@@ -1,8 +1,9 @@
 package com.marciliojr.compraz.controller;
 
+import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.service.ItemService;
-import com.marciliojr.compraz.service.PDFGenerationService;
+import com.marciliojr.compraz.service.PDFGeradorProdutos;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +18,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
-import static com.marciliojr.compraz.infra.ComprazUtils.parseDate;
 import static com.marciliojr.compraz.infra.ComprazUtils.sanitizeString;
 
 @RestController
@@ -33,19 +34,18 @@ public class ItemController {
     }
 
     @Autowired
-    private  PDFGenerationService pdfGenerationService;
+    private PDFGeradorProdutos pdfGeradorProdutos;
 
     @GetMapping("/itens")
     public ResponseEntity<List<ItemDTO>> buscarItensPorEstabelecimentoEPeriodo(
             @RequestParam(required = false) String nomeEstabelecimento,
-            @RequestParam(required = false) String dataInicio,
-            @RequestParam(required = false) String dataFim) {
+            @RequestParam int tipoCupom,
+            @RequestParam(required = false) LocalDate dataInicio,
+            @RequestParam(required = false) LocalDate dataFim) {
 
-        LocalDate inicio = parseDate(dataInicio);
-        LocalDate fim = parseDate(dataFim);
         nomeEstabelecimento = sanitizeString(nomeEstabelecimento);
 
-        List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, inicio, fim);
+        List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
 
         return ResponseEntity.ok(itens);
     }
@@ -53,12 +53,11 @@ public class ItemController {
     @GetMapping("/soma-valor-unitario")
     public ResponseEntity<BigDecimal> somarValorUnitarioPorEstabelecimentoEPeriodo(
             @RequestParam String nomeEstabelecimento,
-            @RequestParam(required = false) String dataInicio,
-            @RequestParam(required = false) String dataFim) {
+            @RequestParam int tipoCupom,
+            @RequestParam(required = false) LocalDate dataInicio,
+            @RequestParam(required = false) LocalDate dataFim) {
 
-        LocalDate inicio = (dataInicio != null && !dataInicio.isEmpty()) ? LocalDate.parse(dataInicio) : null;
-        LocalDate fim = (dataFim != null && !dataFim.isEmpty()) ? LocalDate.parse(dataFim) : null;
-        BigDecimal soma = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo(StringUtils.trimToNull(nomeEstabelecimento), inicio, fim);
+        BigDecimal soma = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo(StringUtils.trimToNull(nomeEstabelecimento), TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
 
         return ResponseEntity.ok(soma);
     }
@@ -66,17 +65,18 @@ public class ItemController {
     @GetMapping("/exportar/pdf")
     public ResponseEntity<byte[]> exportarParaPDF(
             @RequestParam String nomeEstabelecimento,
-            @RequestParam(required = false) String dataInicio,
-            @RequestParam(required = false) String dataFim) {
+            @RequestParam int tipoCupom,
+            @RequestParam(required = false) LocalDate dataInicio,
+            @RequestParam(required = false) LocalDate dataFim) {
 
-        LocalDate inicio = (dataInicio != null && !dataInicio.isEmpty()) ? LocalDate.parse(dataInicio) : null;
-        LocalDate fim = (dataFim != null && !dataFim.isEmpty()) ? LocalDate.parse(dataFim) : null;
         nomeEstabelecimento = sanitizeString(nomeEstabelecimento);
 
-        List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, inicio, fim);
-
         try {
-            byte[] pdfBytes = pdfGenerationService.generatePDF(itens);
+            List<ItemDTO> itens = itemService.listarItensPorEstabelecimentoEPeriodo(nomeEstabelecimento, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
+
+            BigDecimal valorSomatorio = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo(nomeEstabelecimento, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim);
+
+            byte[] pdfBytes = pdfGeradorProdutos.generatePDF(itens, Objects.requireNonNullElse(valorSomatorio.toString(), "0.00"));
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=relatorio_compras.pdf")
