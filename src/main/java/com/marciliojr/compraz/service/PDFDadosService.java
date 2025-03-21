@@ -4,6 +4,7 @@ import com.marciliojr.compraz.model.Compra;
 import com.marciliojr.compraz.model.Estabelecimento;
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.TipoCupom;
+import com.marciliojr.compraz.model.dto.CompraDTO;
 import com.marciliojr.compraz.repository.CompraRepository;
 import com.marciliojr.compraz.repository.EstabelecimentoRepository;
 import org.slf4j.Logger;
@@ -15,10 +16,8 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +38,11 @@ public class PDFDadosService {
         validarEntradas(textoPDF, nomeEstabelecimento);
 
         Estabelecimento estabelecimento = salvarEstabelecimento(nomeEstabelecimento, tipoCupom);
-        Compra compra = criarCompra(estabelecimento, dataCadastro);
+        String dataFormatada = isNull(dataCadastro) ? LocalDate.now().format(DateTimeFormatter.ISO_DATE) : dataCadastro.format(DateTimeFormatter.ISO_DATE);
+        Optional<CompraDTO> compraEncontrada = compraRepository.findOneCompraDTOByNomeEstabelecimentoAndDataCompra(nomeEstabelecimento, dataFormatada);
+        Compra compra = compraEncontrada.map(dto -> compraRepository.findById(dto.getId()).get())
+                .orElseGet(() -> criarCompra(estabelecimento, dataCadastro));
+
         List<Item> itens = extrairItensDoTexto(textoPDF, compra);
 
         if (!itens.isEmpty()) {

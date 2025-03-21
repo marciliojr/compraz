@@ -10,9 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface CompraRepository extends JpaRepository <Compra, Long>  {
+public interface CompraRepository extends JpaRepository<Compra, Long> {
     @Query("SELECT new com.marciliojr.compraz.model.dto.CompraDTO(" +
             "c.id, e.nomeEstabelecimento, c.dataCompra, SUM(i.valorTotal)) " +
             "FROM Item i " +
@@ -28,5 +29,17 @@ public interface CompraRepository extends JpaRepository <Compra, Long>  {
             @Param("tipoCupom") TipoCupom tipoCupom,
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
+
+    @Query("SELECT new com.marciliojr.comprazfx.model.dto.CompraDTO(" +
+            "c.id, e.nomeEstabelecimento, c.dataCompra, SUM(i.valorTotal)) " +
+            "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
+            "WHERE e.nomeEstabelecimento = :nomeEstabelecimento " +
+            "AND c.dataCompra = :dataCompra " +
+            "GROUP BY c.id, e.nomeEstabelecimento, c.dataCompra")
+    Optional<CompraDTO> findOneCompraDTOByNomeEstabelecimentoAndDataCompra(
+            @Param("nomeEstabelecimento") String nomeEstabelecimento,
+            @Param("dataCompra") String dataCompra);
 
 }
