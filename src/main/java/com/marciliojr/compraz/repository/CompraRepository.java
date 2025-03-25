@@ -30,7 +30,7 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
 
-    @Query("SELECT new com.marciliojr.comprazfx.model.dto.CompraDTO(" +
+    @Query("SELECT new com.marciliojr.compraz.model.dto.CompraDTO(" +
             "c.id, e.nomeEstabelecimento, c.dataCompra, SUM(i.valorTotal)) " +
             "FROM Item i " +
             "JOIN i.compra c " +

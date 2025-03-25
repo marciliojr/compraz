@@ -11,12 +11,13 @@ import java.util.Optional;
 @Service
 public class EstabelecimentoService {
 
-    @Autowired
+
     EstabelecimentoRepository estabelecimentoRepository;
 
     public EstabelecimentoService() {
     }
-
+    
+    @Autowired
     public EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository) {
         this.estabelecimentoRepository = estabelecimentoRepository;
     }

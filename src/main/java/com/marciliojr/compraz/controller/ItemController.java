@@ -27,12 +27,12 @@ import static com.marciliojr.compraz.infra.ComprazUtils.sanitizeString;
 public class ItemController {
 
     private final ItemService itemService;
-    @Autowired
-    private PDFGeradorProdutos pdfGeradorProdutos;
+    private final PDFGeradorProdutos pdfGeradorProdutos;
 
     @Autowired
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, PDFGeradorProdutos pdfGeradorProdutos) {
         this.itemService = itemService;
+        this.pdfGeradorProdutos = pdfGeradorProdutos;
     }
 
     @GetMapping("/itens")
