@@ -30,7 +30,7 @@ public class CompraService {
         compraRepository.deleteById(id);
     }
 
-    public CompraDTO buscarCompraPorEstabelecimentoEData(String nomeEstabelecimento, String dataCompra) {
+    public CompraDTO buscarCompraPorEstabelecimentoEData(String nomeEstabelecimento, LocalDate dataCompra) {
         return compraRepository.findOneCompraDTOByNomeEstabelecimentoAndDataCompra(nomeEstabelecimento, dataCompra).orElse(null);
     }
 

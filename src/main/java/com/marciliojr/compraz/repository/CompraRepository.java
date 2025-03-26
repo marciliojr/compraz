@@ -40,6 +40,6 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
             "GROUP BY c.id, e.nomeEstabelecimento, c.dataCompra")
     Optional<CompraDTO> findOneCompraDTOByNomeEstabelecimentoAndDataCompra(
             @Param("nomeEstabelecimento") String nomeEstabelecimento,
-            @Param("dataCompra") String dataCompra);
+            @Param("dataCompra") LocalDate dataCompra);
 
 }

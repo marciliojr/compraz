@@ -38,7 +38,7 @@ public class ItemController {
     @GetMapping("/itens")
     public ResponseEntity<List<ItemDTO>> buscarItensPorEstabelecimentoEPeriodo(
             @RequestParam(required = false) String nomeEstabelecimento,
-            @RequestParam(required = false) Integer tipoCupom,
+            @RequestParam(required = true) Integer tipoCupom,
             @RequestParam(required = false) LocalDate dataInicio,
             @RequestParam(required = false) LocalDate dataFim) {
 

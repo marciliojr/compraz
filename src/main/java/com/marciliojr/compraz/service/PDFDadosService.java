@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +37,7 @@ public class PDFDadosService {
         validarEntradas(textoPDF, nomeEstabelecimento);
 
         Estabelecimento estabelecimento = salvarEstabelecimento(nomeEstabelecimento, tipoCupom);
-        String dataFormatada = isNull(dataCadastro) ? LocalDate.now().format(DateTimeFormatter.ISO_DATE) : dataCadastro.format(DateTimeFormatter.ISO_DATE);
+        LocalDate dataFormatada = isNull(dataCadastro) ? LocalDate.now() : dataCadastro;
         Optional<CompraDTO> compraEncontrada = compraRepository.findOneCompraDTOByNomeEstabelecimentoAndDataCompra(nomeEstabelecimento, dataFormatada);
         Compra compra = compraEncontrada.map(dto -> compraRepository.findById(dto.getId()).get())
                 .orElseGet(() -> criarCompra(estabelecimento, dataCadastro));
