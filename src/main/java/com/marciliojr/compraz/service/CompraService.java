@@ -2,6 +2,7 @@ package com.marciliojr.compraz.service;
 
 import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.CompraDTO;
+import com.marciliojr.compraz.model.dto.CompraRelatorioDTO;
 import com.marciliojr.compraz.repository.CompraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,10 @@ public class CompraService {
 
     public CompraDTO buscarCompraPorEstabelecimentoEData(String nomeEstabelecimento, LocalDate dataCompra) {
         return compraRepository.findOneCompraDTOByNomeEstabelecimentoAndDataCompra(nomeEstabelecimento, dataCompra).orElse(null);
+    }
+
+    public List<CompraRelatorioDTO> gerarRelatorioPorDataCompra(LocalDate dataInicio, LocalDate dataFim) {
+        return compraRepository.findRelatorioByDataCompra(dataInicio, dataFim);
     }
 
 }

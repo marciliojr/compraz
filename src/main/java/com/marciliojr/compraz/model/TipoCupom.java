@@ -2,6 +2,7 @@ package com.marciliojr.compraz.model;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public enum TipoCupom {
     TODOS(0, "Todos"),
@@ -18,7 +19,10 @@ public enum TipoCupom {
         this.descricao = descricao;
     }
 
-    public static TipoCupom obterPorCodigo(int codigo) {
+    public static TipoCupom obterPorCodigo(Integer codigo) {
+        if (Objects.isNull(codigo) || TipoCupom.TODOS.codigo == codigo) {
+            return null;
+        }
         for (TipoCupom tipo : values()) {
             if (tipo.getCodigo() == codigo) {
                 return tipo;

@@ -30,11 +30,7 @@ public class ItemService {
     }
 
     public List<ItemDTO> listarTodos() {
-        return itemRepository.findAll().stream()
-                .map(item -> ItemDTO.construir(item.getNome(), item.getQuantidade(), item.getUnidade(),
-                        item.getValorTotal(), item.getValorUnitario(), item.getCompra().getDataCompra(),
-                        item.getCompra().getEstabelecimento().getNomeEstabelecimento()))
-                .collect(Collectors.toList());
+        return itemRepository.findAll().stream().map(item -> ItemDTO.construir(item.getNome(), item.getQuantidade(), item.getUnidade(), item.getValorTotal(), item.getValorUnitario(), item.getCompra().getDataCompra(), item.getCompra().getEstabelecimento().getNomeEstabelecimento())).collect(Collectors.toList());
     }
 
     public List<ItemDTO> listarItensPorEstabelecimentoEPeriodo(String nomeEstabelecimento, TipoCupom tipoCupom, LocalDate dataInicio, LocalDate dataFim) {
@@ -66,8 +62,7 @@ public class ItemService {
     }
 
     public void atualizarItem(ItemDTO itemDTO) {
-        Item item = itemRepository.findById(itemDTO.getId())
-                .orElseThrow(() -> new RuntimeException("Item não encontrado"));
+        Item item = itemRepository.findById(itemDTO.getId()).orElseThrow(() -> new RuntimeException("Item não encontrado"));
 
         item.setNome(itemDTO.getNome());
         item.setQuantidade(itemDTO.getQuantidade());

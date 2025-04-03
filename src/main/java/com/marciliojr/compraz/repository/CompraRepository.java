@@ -3,6 +3,7 @@ package com.marciliojr.compraz.repository;
 import com.marciliojr.compraz.model.Compra;
 import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.CompraDTO;
+import com.marciliojr.compraz.model.dto.CompraRelatorioDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,7 +20,9 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
             "FROM Item i " +
             "JOIN i.compra c " +
             "JOIN c.estabelecimento e " +
-            "WHERE (:nomeEstabelecimento IS NULL OR e.nomeEstabelecimento = :nomeEstabelecimento) " +
+            "WHERE (:nomeEstabelecimento IS NULL OR e.nomeEstabelecimento LIKE CONCAT('%', :nomeEstabelecimento, '%') " +
+            "OR e.nomeEstabelecimento LIKE CONCAT(:nomeEstabelecimento, '%') " +
+            "OR e.nomeEstabelecimento LIKE CONCAT('%', :nomeEstabelecimento))" +
             "AND (:tipoCupom IS NULL OR e.tipoCupom = :tipoCupom) " +
             "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
             "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim) " +
@@ -42,4 +45,14 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
             @Param("nomeEstabelecimento") String nomeEstabelecimento,
             @Param("dataCompra") LocalDate dataCompra);
 
+    @Query("SELECT new com.marciliojr.compraz.model.dto.CompraRelatorioDTO(" +
+            "e.nomeEstabelecimento, SUM(i.valorTotal)) " +
+            "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
+            "WHERE c.dataCompra BETWEEN :dataInicio AND :dataFim " +
+            "GROUP BY e.nomeEstabelecimento")
+    List<CompraRelatorioDTO> findRelatorioByDataCompra(
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim);
 }
