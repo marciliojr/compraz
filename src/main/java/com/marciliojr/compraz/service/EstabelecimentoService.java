@@ -11,19 +11,18 @@ import java.util.Optional;
 @Service
 public class EstabelecimentoService {
 
-
     EstabelecimentoRepository estabelecimentoRepository;
 
     public EstabelecimentoService() {
     }
-    
+
     @Autowired
     public EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository) {
         this.estabelecimentoRepository = estabelecimentoRepository;
     }
 
     public List<Estabelecimento> listarTodos() {
-        return estabelecimentoRepository.findAllEstabelecimento();
+        return estabelecimentoRepository.findAll();
     }
 
     public void removerEstabelecimento(Long id) {
@@ -32,5 +31,9 @@ public class EstabelecimentoService {
 
     public Optional<Estabelecimento> obterEstabelecimento(String nome) {
         return estabelecimentoRepository.findByNomeEstabelecimento(nome);
+    }
+
+    public Estabelecimento salvarOuAtualizar(Estabelecimento estabelecimento) {
+        return estabelecimentoRepository.save(estabelecimento);
     }
 }

@@ -6,6 +6,10 @@ import com.marciliojr.compraz.service.ItemService;
 import com.marciliojr.compraz.service.PDFGeradorProdutos;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +71,49 @@ public class ItemController {
         List<ItemDTO> itens = itemService.listarItensPorNomeEPeriodo(nomeProduto, TipoCupom.obterPorCodigo(tipoCupom), dataInicio, dataFim, nomeEstabelecimento);
 
         return ResponseEntity.ok(itens);
+    }
+
+    @GetMapping("/produtos/paginado")
+    public ResponseEntity<Page<ItemDTO>> buscarProdutos(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String nomeEstabelecimento,
+            @RequestParam(required = false) TipoCupom tipoCupom,
+            @RequestParam(required = false) LocalDate dataInicio,
+            @RequestParam(required = false) LocalDate dataFim,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nome") String sort
+    ) {
+        String campoOrdenacao = "nome"; // Campo padrão
+        if (sort != null) {
+            switch (sort.toLowerCase()) {
+                case "nome":
+                case "quantidade":
+                case "unidade":
+                case "valortotal":
+                case "valorunitario":
+                case "datacompra":
+                case "nomeestabelecimento":
+                    campoOrdenacao = sort;
+                    break;
+                default:
+                    // Se o campo não for válido, usa o padrão
+                    break;
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(campoOrdenacao));
+
+        Page<ItemDTO> produtos = itemService.buscarProdutosPaginados(
+                nome,
+                nomeEstabelecimento,
+                tipoCupom,
+                dataInicio,
+                dataFim,
+                pageable
+        );
+
+        return ResponseEntity.ok(produtos);
     }
 
     @GetMapping("/soma-valor-total")

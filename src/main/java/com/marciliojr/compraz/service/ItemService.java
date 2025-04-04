@@ -7,6 +7,8 @@ import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -51,6 +53,17 @@ public class ItemService {
 
     public List<ItemDTO> listarItensPorNomeEPeriodo(String nome, TipoCupom tipoCupom, LocalDate dataInicio, LocalDate dataFim, String nomeEstabelecimento) {
         return itemRepository.findByNomeByPeriodo(nome, tipoCupom, dataInicio, dataFim, nomeEstabelecimento);
+    }
+
+    public Page<ItemDTO> buscarProdutosPaginados(
+            String nome,
+            String nomeEstabelecimento,
+            TipoCupom tipoCupom,
+            LocalDate dataInicio,
+            LocalDate dataFim,
+            Pageable pageable
+    ) {
+        return itemRepository.findByNomeByPeriodoPaginado(nome, tipoCupom, dataInicio, dataFim, nomeEstabelecimento, pageable);
     }
 
     public void deleteById(Long id) {

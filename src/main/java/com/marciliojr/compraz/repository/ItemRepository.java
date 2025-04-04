@@ -4,6 +4,8 @@ import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -65,13 +67,38 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             @Param("dataFim") LocalDate dataFim,
             @Param("nomeEstabelecimento") String nomeEstabelecimento);
 
-    @Query("SELECT new com.marciliojr.compraz.model.dto.ItemDTO(i.nome, i.quantidade, i.unidade, i.valorTotal, i.valorUnitario, i.compra.dataCompra, i.compra.estabelecimento.nomeEstabelecimento) " +
+    @Query("SELECT new com.marciliojr.compraz.model.dto.ItemDTO(" +
+            "i.id, i.nome, i.quantidade, i.unidade, i.valorTotal, i.valorUnitario, " +
+            "c.dataCompra, e.nomeEstabelecimento) " +
             "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
             "WHERE (:nome IS NULL OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) " +
-            "AND (:tipoCupom IS NULL OR i.compra.estabelecimento.tipoCupom = :tipoCupom) " +
-            "AND (:dataInicio IS NULL OR i.compra.dataCompra >= :dataInicio) " +
-            "AND (:dataFim IS NULL OR i.compra.dataCompra <= :dataFim) " +
-            "ORDER BY i.compra.dataCompra DESC")
+            "AND (:tipoCupom IS NULL OR e.tipoCupom = :tipoCupom) " +
+            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
+            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)" +
+            "AND (:nomeEstabelecimento IS NULL OR LOWER(e.nomeEstabelecimento) LIKE LOWER(CONCAT('%', :nomeEstabelecimento, '%'))) " +
+            "ORDER BY i.nome asc")
+    Page<ItemDTO> findByNomeByPeriodoPaginado(
+            @Param("nome") String nome,
+            @Param("tipoCupom") TipoCupom tipoCupom,
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("nomeEstabelecimento") String nomeEstabelecimento,
+            Pageable pageable);
+
+
+    @Query("SELECT new com.marciliojr.compraz.model.dto.ItemDTO(" +
+            "i.id, i.nome, i.quantidade, i.unidade, i.valorTotal, i.valorUnitario, " +
+            "c.dataCompra, e.nomeEstabelecimento) " +
+            "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
+            "WHERE (:nome IS NULL OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) " +
+            "AND (:tipoCupom IS NULL OR e.tipoCupom = :tipoCupom) " +
+            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
+            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)" +
+            "AND (:nomeEstabelecimento IS NULL OR LOWER(e.nomeEstabelecimento) LIKE LOWER(CONCAT('%', :nomeEstabelecimento, '%')))")
     List<ItemDTO> findByNomeAndEstabelecimentoByPeriodo(@Param("nome") String nome, @Param("tipoCupom") TipoCupom tipoCupom, @Param("dataInicio") LocalDate dataInicio, @Param("dataFim") LocalDate dataFim);
 
     void deleteById(Long id);
