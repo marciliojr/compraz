@@ -1,6 +1,5 @@
 package com.marciliojr.compraz.service;
 
-import com.marciliojr.compraz.infra.ItemNormalizer;
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.ItemDTO;
@@ -31,13 +30,17 @@ public class ItemService {
         this.itemRepository = itemRepository;
     }
 
-    public List<ItemDTO> listarTodos() {
+    public List<ItemDTO> listarTodosItemDTO() {
         return itemRepository.findAll().stream().map(item -> ItemDTO.construir(item.getNome(), item.getQuantidade(), item.getUnidade(), item.getValorTotal(), item.getValorUnitario(), item.getCompra().getDataCompra(), item.getCompra().getEstabelecimento().getNomeEstabelecimento())).collect(Collectors.toList());
+    }
+
+    List<Item> listarTodos() {
+        return itemRepository.findAll();
     }
 
     public List<ItemDTO> listarItensPorEstabelecimentoEPeriodo(String nomeEstabelecimento, TipoCupom tipoCupom, LocalDate dataInicio, LocalDate dataFim) {
         if (Objects.isNull(dataInicio) && Objects.isNull(dataFim) && Strings.isBlank(nomeEstabelecimento) && tipoCupom == null) {
-            return listarTodos();
+            return listarTodosItemDTO();
         }
 
         return itemRepository.findAllItemsByEstabelecimentoAndPeriodo(nomeEstabelecimento, tipoCupom, dataInicio, dataFim);
@@ -56,14 +59,14 @@ public class ItemService {
     }
 
     public Page<ItemDTO> buscarProdutosPaginados(
-            String nome,
+            String nomeProduto,
             String nomeEstabelecimento,
             TipoCupom tipoCupom,
             LocalDate dataInicio,
             LocalDate dataFim,
             Pageable pageable
     ) {
-        return itemRepository.findByNomeByPeriodoPaginado(nome, tipoCupom, dataInicio, dataFim, nomeEstabelecimento, pageable);
+        return itemRepository.findByNomeByPeriodoPaginado(nomeProduto, tipoCupom, dataInicio, dataFim, nomeEstabelecimento, pageable);
     }
 
     public void deleteById(Long id) {
@@ -86,12 +89,8 @@ public class ItemService {
         itemRepository.save(item);
     }
 
-    public void normalizarNomes() {
-        List<Item> all = itemRepository.findAll();
-        ItemNormalizer.normalizarNomes(all);
-        for (Item item : all) {
-            itemRepository.save(item);
-        }
+    public void salvarOuAtualizar(Item item) {
+        itemRepository.save(item);
     }
 
 

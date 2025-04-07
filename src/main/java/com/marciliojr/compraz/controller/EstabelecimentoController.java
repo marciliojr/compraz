@@ -1,8 +1,11 @@
 package com.marciliojr.compraz.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.marciliojr.compraz.model.Estabelecimento;
 import com.marciliojr.compraz.service.EstabelecimentoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,14 +24,25 @@ public class EstabelecimentoController {
         return ResponseEntity.ok(estabelecimentos);
     }
 
-    @GetMapping("/remove")
-    public ResponseEntity<Void> removerEstabelecimento(Long id) {
-        estabelecimentoService.removerEstabelecimento(id);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/remover/{id}")
+    public ResponseEntity<String> removerEstabelecimento(@PathVariable Long id) {
+        try {
+            estabelecimentoService.removerEstabelecimento(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
     }
 
+
     @PutMapping("/atualiza")
-    public ResponseEntity<Estabelecimento> atualizarEstabelecimento(Estabelecimento estabelecimento) {
+    public ResponseEntity<Estabelecimento> atualizarEstabelecimento(@RequestBody Estabelecimento estabelecimento) {
+        try {
+            System.out.println("Raw body: " + new ObjectMapper().writeValueAsString(estabelecimento));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         Estabelecimento atualizado = estabelecimentoService.salvarOuAtualizar(estabelecimento);
         return ResponseEntity.ok(atualizado);
     }

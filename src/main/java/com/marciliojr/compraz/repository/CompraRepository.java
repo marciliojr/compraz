@@ -55,4 +55,6 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
     List<CompraRelatorioDTO> findRelatorioByDataCompra(
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
+
+    Boolean existsByEstabelecimentoId(Long idEstabelecimento);
 }

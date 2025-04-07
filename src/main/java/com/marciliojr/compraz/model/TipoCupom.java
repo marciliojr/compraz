@@ -1,5 +1,8 @@
 package com.marciliojr.compraz.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +22,16 @@ public enum TipoCupom {
         this.descricao = descricao;
     }
 
+    @JsonCreator
+    public static TipoCupom forValue(String value) {
+        for (TipoCupom tipo : TipoCupom.values()) {
+            if (tipo.descricao.equalsIgnoreCase(value)) {
+                return tipo;
+            }
+        }
+        throw new IllegalArgumentException("Unknown enum type " + value);
+    }
+
     public static TipoCupom obterPorCodigo(Integer codigo) {
         if (Objects.isNull(codigo) || TipoCupom.TODOS.codigo == codigo) {
             return null;
@@ -33,6 +46,11 @@ public enum TipoCupom {
 
     public static List<TipoCupom> obterTodos() {
         return Arrays.asList(values());
+    }
+
+    @JsonValue
+    public String toValue() {
+        return this.descricao;
     }
 
     public int getCodigo() {

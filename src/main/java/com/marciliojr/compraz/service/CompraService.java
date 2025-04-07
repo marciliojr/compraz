@@ -39,4 +39,8 @@ public class CompraService {
         return compraRepository.findRelatorioByDataCompra(dataInicio, dataFim);
     }
 
+    public boolean existeComprasPorEstabelecimento(Long IdEstabelecimento) {
+        return compraRepository.existsByEstabelecimentoId(IdEstabelecimento);
+    }
+
 }

@@ -73,11 +73,11 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveListarTodosItens() {
+    void deveListarTodosItemDTOItens() {
 
         when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
 
-        List<ItemDTO> resultado = itemService.listarTodos();
+        List<ItemDTO> resultado = itemService.listarTodosItemDTO();
 
         assertThat(resultado).hasSize(1);
         ItemDTO resultadoDTO = resultado.get(0);
@@ -227,15 +227,4 @@ class ItemServiceTest {
         verify(itemRepository).save(any(Item.class));
     }
 
-    @Test
-    void deveNormalizarNomes() {
-
-        when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
-        when(itemRepository.save(any(Item.class))).thenReturn(item);
-
-        itemService.normalizarNomes();
-
-        verify(itemRepository).findAll();
-        verify(itemRepository).save(any(Item.class));
-    }
-} 
+}

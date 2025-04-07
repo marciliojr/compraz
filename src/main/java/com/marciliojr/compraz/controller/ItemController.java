@@ -57,6 +57,12 @@ public class ItemController {
         return ResponseEntity.ok(itens);
     }
 
+    @GetMapping("/produtos/todos")
+    public ResponseEntity<List<ItemDTO>> listarTodos() {
+        List<ItemDTO> itens = itemService.listarTodosItemDTO();
+        return ResponseEntity.ok(itens);
+    }
+
     @GetMapping("/produtos")
     public ResponseEntity<List<ItemDTO>> buscarItensPorNomeProdutoEstabelecimentoTipoEPeriodo(
             @RequestParam(required = false) String nomeProduto,
@@ -75,9 +81,9 @@ public class ItemController {
 
     @GetMapping("/produtos/paginado")
     public ResponseEntity<Page<ItemDTO>> buscarProdutos(
-            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String nomeProduto,
             @RequestParam(required = false) String nomeEstabelecimento,
-            @RequestParam(required = false) TipoCupom tipoCupom,
+            @RequestParam(required = false) Integer tipoCupom,
             @RequestParam(required = false) LocalDate dataInicio,
             @RequestParam(required = false) LocalDate dataFim,
             @RequestParam(defaultValue = "0") int page,
@@ -105,9 +111,9 @@ public class ItemController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(campoOrdenacao));
 
         Page<ItemDTO> produtos = itemService.buscarProdutosPaginados(
-                nome,
+                nomeProduto,
                 nomeEstabelecimento,
-                tipoCupom,
+                TipoCupom.obterPorCodigo(tipoCupom),
                 dataInicio,
                 dataFim,
                 pageable

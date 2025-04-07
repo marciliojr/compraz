@@ -1,11 +1,8 @@
 package com.marciliojr.compraz.infra;
 
 
-import com.marciliojr.compraz.model.Item;
-
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ItemNormalizer {
@@ -14,7 +11,6 @@ public class ItemNormalizer {
 
     static {
         abreviacoes = new HashMap<>();
-
         abreviacoes.put("AZEIT", "AZEITE");
         abreviacoes.put("AZEIT ", "AZEITE");
         abreviacoes.put("EXT", "EXTRATO");
@@ -79,23 +75,9 @@ public class ItemNormalizer {
         abreviacoes.put("GRAN ", "GRANULADO");
         abreviacoes.put("MARG", "MARGARINA");
         abreviacoes.put("MARG ", "MARGARINA");
-
     }
 
     public static Map<String, String> getMapaabreviacoes() {
         return Collections.unmodifiableMap(abreviacoes);
-    }
-
-    public static void normalizarNomes(List<Item> itens) {
-        for (Item item : itens) {
-            String[] palavras = item.getNome().trim().split(" ");
-            for (int i = 0; i < palavras.length; i++) {
-                String chave = palavras[i].toUpperCase();
-                if (getMapaabreviacoes().containsKey(chave)) {
-                    palavras[i] = getMapaabreviacoes().get(chave);
-                }
-            }
-            item.setNome(String.join(" ", palavras));
-        }
     }
 }

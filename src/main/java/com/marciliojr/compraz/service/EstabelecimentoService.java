@@ -13,12 +13,15 @@ public class EstabelecimentoService {
 
     EstabelecimentoRepository estabelecimentoRepository;
 
+    CompraService compraService;
+
     public EstabelecimentoService() {
     }
 
     @Autowired
-    public EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository) {
+    EstabelecimentoService(EstabelecimentoRepository estabelecimentoRepository, CompraService compraService) {
         this.estabelecimentoRepository = estabelecimentoRepository;
+        this.compraService = compraService;
     }
 
     public List<Estabelecimento> listarTodos() {
@@ -26,7 +29,14 @@ public class EstabelecimentoService {
     }
 
     public void removerEstabelecimento(Long id) {
-        estabelecimentoRepository.deleteById(id);
+        if (compraService.existeComprasPorEstabelecimento(id)) {
+            throw new RuntimeException("Existem compras relacionadas a este estabelecimento.");
+        }
+        try {
+            estabelecimentoRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao remover estabelecimento: " + e.getMessage());
+        }
     }
 
     public Optional<Estabelecimento> obterEstabelecimento(String nome) {
