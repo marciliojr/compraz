@@ -7,6 +7,7 @@ import com.marciliojr.compraz.repository.CompraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -41,6 +42,11 @@ public class CompraService {
 
     public boolean existeComprasPorEstabelecimento(Long IdEstabelecimento) {
         return compraRepository.existsByEstabelecimentoId(IdEstabelecimento);
+    }
+
+    public BigDecimal somarValorTotalPorEstabelecimentoEPeriodo(String nomeEstabelecimento, TipoCupom tipoCupom, LocalDate dataInicio, LocalDate dataFim) {
+        BigDecimal soma = compraRepository.sumValorTotalByEstabelecimentoAndPeriodo(nomeEstabelecimento, tipoCupom, dataInicio, dataFim);
+        return soma != null ? soma : BigDecimal.ZERO;
     }
 
 }

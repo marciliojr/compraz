@@ -77,7 +77,7 @@ public class ItemService {
         itemRepository.deleteByCompraId(compraId);
     }
 
-    public void atualizarItem(ItemDTO itemDTO) {
+    public ItemDTO atualizarItem(ItemDTO itemDTO) {
         Item item = itemRepository.findById(itemDTO.getId()).orElseThrow(() -> new RuntimeException("Item não encontrado"));
 
         item.setNome(itemDTO.getNome());
@@ -86,7 +86,16 @@ public class ItemService {
         item.setValorUnitario(itemDTO.getValorUnitario());
         item.setValorTotal(itemDTO.getValorTotal());
 
-        itemRepository.save(item);
+        Item itemAtualizado = itemRepository.save(item);
+        return ItemDTO.construir(
+                itemAtualizado.getNome(),
+                itemAtualizado.getQuantidade(),
+                itemAtualizado.getUnidade(),
+                itemAtualizado.getValorTotal(),
+                itemAtualizado.getValorUnitario(),
+                itemAtualizado.getCompra().getDataCompra(),
+                itemAtualizado.getCompra().getEstabelecimento().getNomeEstabelecimento()
+        );
     }
 
     public void salvarOuAtualizar(Item item) {

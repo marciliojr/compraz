@@ -14,9 +14,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class EstabelecimentoServiceTest {
@@ -84,5 +87,49 @@ class EstabelecimentoServiceTest {
 
         assertThat(resultado).isEmpty();
         verify(estabelecimentoRepository).findByNomeEstabelecimento("Estabelecimento Inexistente");
+    }
+
+    @Test
+    void deveVerificarSeExistemComprasPorEstabelecimento() {
+        when(compraService.existeComprasPorEstabelecimento(1L)).thenReturn(true);
+
+        boolean resultado = estabelecimentoService.existeComprasPorEstabelecimento(1L);
+
+        assertThat(resultado).isTrue();
+        verify(compraService).existeComprasPorEstabelecimento(1L);
+    }
+
+    @Test
+    void deveAtualizarEstabelecimento() {
+        Estabelecimento estabelecimentoAtualizado = new Estabelecimento();
+        estabelecimentoAtualizado.setId(1L);
+        estabelecimentoAtualizado.setNomeEstabelecimento("Mercado Atualizado");
+        estabelecimentoAtualizado.setTipoCupom(TipoCupom.MERCADO);
+
+        when(estabelecimentoRepository.findById(1L)).thenReturn(Optional.of(estabelecimento));
+        when(estabelecimentoRepository.save(any(Estabelecimento.class))).thenReturn(estabelecimentoAtualizado);
+
+        Estabelecimento resultado = estabelecimentoService.atualizarEstabelecimento(1L, estabelecimentoAtualizado);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNomeEstabelecimento()).isEqualTo("Mercado Atualizado");
+        verify(estabelecimentoRepository).findById(1L);
+        verify(estabelecimentoRepository).save(any(Estabelecimento.class));
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoEstabelecimentoNaoExiste() {
+        Estabelecimento estabelecimentoAtualizado = new Estabelecimento();
+        estabelecimentoAtualizado.setId(1L);
+        estabelecimentoAtualizado.setNomeEstabelecimento("Mercado Atualizado");
+        estabelecimentoAtualizado.setTipoCupom(TipoCupom.MERCADO);
+
+        when(estabelecimentoRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () ->
+                estabelecimentoService.atualizarEstabelecimento(1L, estabelecimentoAtualizado));
+
+        verify(estabelecimentoRepository).findById(1L);
+        verify(estabelecimentoRepository, never()).save(any(Estabelecimento.class));
     }
 }

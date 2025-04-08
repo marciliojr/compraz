@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -57,4 +58,20 @@ public interface CompraRepository extends JpaRepository<Compra, Long> {
             @Param("dataFim") LocalDate dataFim);
 
     Boolean existsByEstabelecimentoId(Long idEstabelecimento);
+
+    @Query("SELECT SUM(i.valorTotal) " +
+            "FROM Item i " +
+            "JOIN i.compra c " +
+            "JOIN c.estabelecimento e " +
+            "WHERE (:nomeEstabelecimento IS NULL OR e.nomeEstabelecimento LIKE CONCAT('%', :nomeEstabelecimento, '%') " +
+            "OR e.nomeEstabelecimento LIKE CONCAT(:nomeEstabelecimento, '%') " +
+            "OR e.nomeEstabelecimento LIKE CONCAT('%', :nomeEstabelecimento))" +
+            "AND (:tipoCupom IS NULL OR e.tipoCupom = :tipoCupom) " +
+            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
+            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)")
+    BigDecimal sumValorTotalByEstabelecimentoAndPeriodo(
+            @Param("nomeEstabelecimento") String nomeEstabelecimento,
+            @Param("tipoCupom") TipoCupom tipoCupom,
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim);
 }

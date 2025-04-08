@@ -195,4 +195,22 @@ public class ItemController {
         itemService.deleteByCompraId(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/atualizar")
+    public ResponseEntity<ItemDTO> atualizarItem(@RequestBody ItemDTO itemDTO) {
+        ItemDTO itemAtualizado = itemService.atualizarItem(itemDTO);
+        return ResponseEntity.ok(itemAtualizado);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarItem(@PathVariable Long id) {
+        itemService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/compra/{compraId}")
+    public ResponseEntity<Void> deletarItensPorCompra(@PathVariable Long compraId) {
+        itemService.deleteByCompraId(compraId);
+        return ResponseEntity.noContent().build();
+    }
 }

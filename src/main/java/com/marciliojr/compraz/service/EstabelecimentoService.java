@@ -46,4 +46,18 @@ public class EstabelecimentoService {
     public Estabelecimento salvarOuAtualizar(Estabelecimento estabelecimento) {
         return estabelecimentoRepository.save(estabelecimento);
     }
+
+    public boolean existeComprasPorEstabelecimento(Long id) {
+        return compraService.existeComprasPorEstabelecimento(id);
+    }
+
+    public Estabelecimento atualizarEstabelecimento(Long id, Estabelecimento estabelecimentoAtualizado) {
+        Estabelecimento estabelecimento = estabelecimentoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Estabelecimento não encontrado"));
+        
+        estabelecimento.setNomeEstabelecimento(estabelecimentoAtualizado.getNomeEstabelecimento());
+        estabelecimento.setTipoCupom(estabelecimentoAtualizado.getTipoCupom());
+        
+        return estabelecimentoRepository.save(estabelecimento);
+    }
 }

@@ -120,4 +120,54 @@ class CompraServiceTest {
                 dataCompra
         );
     }
+
+    @Test
+    void deveSomarValorTotalPorEstabelecimentoEPeriodo() {
+        when(compraRepository.sumValorTotalByEstabelecimentoAndPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        )).thenReturn(BigDecimal.TEN);
+
+        BigDecimal resultado = compraService.somarValorTotalPorEstabelecimentoEPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+
+        assertThat(resultado).isEqualTo(BigDecimal.TEN);
+        verify(compraRepository).sumValorTotalByEstabelecimentoAndPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+    }
+
+    @Test
+    void deveRetornarZeroQuandoNaoHouverComprasNoPeriodo() {
+        when(compraRepository.sumValorTotalByEstabelecimentoAndPeriodo(
+                "Mercado Inexistente",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        )).thenReturn(null);
+
+        BigDecimal resultado = compraService.somarValorTotalPorEstabelecimentoEPeriodo(
+                "Mercado Inexistente",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+
+        assertThat(resultado).isEqualTo(BigDecimal.ZERO);
+        verify(compraRepository).sumValorTotalByEstabelecimentoAndPeriodo(
+                "Mercado Inexistente",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+    }
 } 
