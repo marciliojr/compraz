@@ -1,7 +1,9 @@
 package com.marciliojr.compraz.service;
 
 import com.marciliojr.compraz.model.Compra;
+import com.marciliojr.compraz.model.Estabelecimento;
 import com.marciliojr.compraz.model.Item;
+import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.ItemDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,13 +12,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
-import java.util.Arrays;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,49 +36,263 @@ class ItemServiceTest {
     @InjectMocks
     private ItemService itemService;
 
-    private Item item1, item2;
-    private Compra compra;
+    private Item item;
+    private ItemDTO itemDTO;
+    private LocalDate dataCompra;
 
     @BeforeEach
     void setUp() {
-        compra = new Compra();
-        compra.setDataCompra(LocalDate.of(2024, 1, 20));
+        dataCompra = LocalDate.now();
 
-        item1 = new Item(1L, "Arroz", BigDecimal.valueOf(5), "Kg", BigDecimal.valueOf(10), BigDecimal.valueOf(50), compra);
-        item2 = new Item(2L, "Feijão", BigDecimal.valueOf(2), "Kg", BigDecimal.valueOf(8), BigDecimal.valueOf(16), compra);
+        Estabelecimento estabelecimento = new Estabelecimento();
+        estabelecimento.setId(1L);
+        estabelecimento.setNomeEstabelecimento("Mercado Teste");
+        estabelecimento.setTipoCupom(TipoCupom.MERCADO);
+
+        Compra compra = new Compra();
+        compra.setId(1L);
+        compra.setEstabelecimento(estabelecimento);
+        compra.setDataCompra(dataCompra);
+
+        item = new Item();
+        item.setId(1L);
+        item.setNome("Produto Teste");
+        item.setQuantidade(BigDecimal.ONE);
+        item.setUnidade("UN");
+        item.setValorUnitario(BigDecimal.TEN);
+        item.setValorTotal(BigDecimal.TEN);
+        item.setCompra(compra);
+
+        itemDTO = ItemDTO.construir(
+                item.getNome(),
+                item.getQuantidade(),
+                item.getUnidade(),
+                item.getValorTotal(),
+                item.getValorUnitario(),
+                compra.getDataCompra(),
+                estabelecimento.getNomeEstabelecimento()
+        );
     }
 
     @Test
-    void listarTodos_DeveRetornarListaDeItensDTO() {
-        when(itemRepository.findAll()).thenReturn(Arrays.asList(item1, item2));
+    void deveListarTodosItemDTO() {
+        List<Item> items = Collections.singletonList(item);
+        when(itemRepository.findAll()).thenReturn(items);
 
-        List<ItemDTO> resultado = itemService.listarTodos();
+        List<ItemDTO> resultado = itemService.listarTodosItemDTO();
 
-        assertEquals(2, resultado.size());
-        assertEquals("Arroz", resultado.get(0).getNome());
-        assertEquals("Feijão", resultado.get(1).getNome());
-
-        verify(itemRepository, times(1)).findAll();
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findAll();
     }
 
     @Test
-    void listarItensPorEstabelecimentoEPeriodo_DeveRetornarItensFiltrados() {
-        when(itemRepository.findAllItemsByEstabelecimentoAndPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)))
-                .thenReturn(Arrays.asList(new ItemDTO(1L, "Arroz", BigDecimal.valueOf(5), "Kg", BigDecimal.valueOf(10), BigDecimal.valueOf(50), LocalDate.of(2024, 1, 20), "Mercado X")));
+    void deveListarItensPorEstabelecimentoEPeriodoComTodosParametrosNulos() {
 
-        List<ItemDTO> resultado = itemService.listarItensPorEstabelecimentoEPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
+        when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
 
-        assertEquals(1, resultado.size());
-        assertEquals("Arroz", resultado.get(0).getNome());
+        List<ItemDTO> resultado = itemService.listarItensPorEstabelecimentoEPeriodo(null, null, null, null);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findAll();
     }
 
     @Test
-    void somarValorUnitarioPorEstabelecimentoEPeriodo_DeveRetornarSomaCorreta() {
-        when(itemRepository.sumValorTotalByEstabelecimentoAndPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31)))
-                .thenReturn(BigDecimal.valueOf(100));
+    void deveListarItensPorEstabelecimentoEPeriodoComParametros() {
+        List<ItemDTO> items = Collections.singletonList(itemDTO);
+        when(itemRepository.findAllItemsByEstabelecimentoAndPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        )).thenReturn(items);
 
-        BigDecimal resultado = itemService.somarValorUnitarioPorEstabelecimentoEPeriodo("Mercado X", LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31));
+        List<ItemDTO> resultado = itemService.listarItensPorEstabelecimentoEPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
 
-        assertEquals(BigDecimal.valueOf(100), resultado);
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findAllItemsByEstabelecimentoAndPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+    }
+
+    @Test
+    void deveListarItensPorCompraId() {
+        List<ItemDTO> items = Collections.singletonList(itemDTO);
+        when(itemRepository.findByCompraId(1L)).thenReturn(items);
+
+        List<ItemDTO> resultado = itemService.listarItensPorCompraId(1L);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findByCompraId(1L);
+    }
+
+    @Test
+    void deveSomarValorTotalPorEstabelecimentoEPeriodo() {
+        when(itemRepository.sumValorTotalByEstabelecimentoAndPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        )).thenReturn(BigDecimal.TEN);
+
+        BigDecimal resultado = itemService.somarValorTotalPorEstabelecimentoEPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+
+        assertThat(resultado).isEqualTo(BigDecimal.TEN);
+        verify(itemRepository).sumValorTotalByEstabelecimentoAndPeriodo(
+                "Mercado Teste",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra
+        );
+    }
+
+    @Test
+    void deveListarItensPorNomeEPeriodo() {
+        List<ItemDTO> items = Collections.singletonList(itemDTO);
+        when(itemRepository.findByNomeByPeriodo(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado"
+        )).thenReturn(items);
+
+        List<ItemDTO> resultado = itemService.listarItensPorNomeEPeriodo(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado"
+        );
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findByNomeByPeriodo(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado"
+        );
+    }
+
+    @Test
+    void deveBuscarProdutosPaginados() {
+        Page<ItemDTO> page = new PageImpl<>(Collections.singletonList(itemDTO));
+        Pageable pageable = PageRequest.of(0, 10);
+        when(itemRepository.findByNomeByPeriodoPaginado(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado",
+                pageable
+        )).thenReturn(page);
+
+        Page<ItemDTO> resultado = itemService.buscarProdutosPaginados(
+                "Produto",
+                "Mercado",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                pageable
+        );
+
+        assertThat(resultado.getContent()).hasSize(1);
+        assertThat(resultado.getContent().get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findByNomeByPeriodoPaginado(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado",
+                pageable
+        );
+    }
+
+    @Test
+    void deveDeletarItemPorId() {
+        itemService.deleteById(1L);
+        verify(itemRepository).deleteById(1L);
+    }
+
+    @Test
+    void deveDeletarItensPorCompraId() {
+        itemService.deleteByCompraId(1L);
+        verify(itemRepository).deleteByCompraId(1L);
+    }
+
+    @Test
+    void deveAtualizarItem() {
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        ItemDTO itemParaAtualizar = new ItemDTO(
+                1L,
+                "Produto Atualizado",
+                BigDecimal.ONE,
+                "UN",
+                BigDecimal.TEN,
+                BigDecimal.TEN,
+                dataCompra,
+                "Mercado Teste"
+        );
+
+        ItemDTO resultado = itemService.atualizarItem(itemParaAtualizar);
+
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNome()).isEqualTo("Produto Atualizado");
+        verify(itemRepository).findById(1L);
+        verify(itemRepository).save(any(Item.class));
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoAtualizarItemNaoEncontrado() {
+        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ItemDTO itemParaAtualizar = new ItemDTO(
+                1L,
+                "Produto Atualizado",
+                BigDecimal.ONE,
+                "UN",
+                BigDecimal.TEN,
+                BigDecimal.TEN,
+                dataCompra,
+                "Mercado Teste"
+        );
+
+        try {
+            itemService.atualizarItem(itemParaAtualizar);
+        } catch (RuntimeException e) {
+            assertThat(e.getMessage()).isEqualTo("Item não encontrado");
+        }
+
+        verify(itemRepository).findById(1L);
+        verify(itemRepository, never()).save(any(Item.class));
+    }
+
+    @Test
+    void deveSalvarOuAtualizarItem() {
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        itemService.salvarOuAtualizar(item);
+
+        verify(itemRepository).save(item);
     }
 }

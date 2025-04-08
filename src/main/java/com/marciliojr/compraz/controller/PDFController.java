@@ -1,31 +1,34 @@
 package com.marciliojr.compraz.controller;
 
 import com.marciliojr.compraz.infra.PDFExtractor;
-import com.marciliojr.compraz.service.PDFDataService;
+import com.marciliojr.compraz.model.TipoCupom;
+import com.marciliojr.compraz.service.PDFDadosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-
-import static com.marciliojr.compraz.infra.ComprazUtils.parseDate;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/pdf")
 public class PDFController {
 
-    @Autowired
-    private PDFDataService pdfDataService;
-
     private final PDFExtractor pdfExtractor = new PDFExtractor();
+    @Autowired
+    private PDFDadosService pdfDadosService;
 
-    @PostMapping("/upload")
+    @PostMapping("/cadastrar")
     public ResponseEntity<String> uploadPDF(
             @RequestParam("file") MultipartFile file,
             @RequestParam("nomeEstabelecimento") String nomeEstabelecimento,
-            @RequestParam("dataCadastro") String dataCadastro) {
+            @RequestParam("dataCadastro") LocalDate dataCadastro,
+            @RequestParam("tipoCupom") int tipoCupom) {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Erro: Arquivo não enviado ou está vazio.");
@@ -38,7 +41,7 @@ public class PDFController {
 
         try {
             String textoPDF = pdfExtractor.extrairTextoPDF(pdfExtractor.converterParaArquivo(file));
-            pdfDataService.processarDadosEPersistir(textoPDF, nomeEstabelecimento, parseDate(dataCadastro));
+            pdfDadosService.processarDadosEPersistir(textoPDF, nomeEstabelecimento, dataCadastro, TipoCupom.obterPorCodigo(tipoCupom));
 
             return ResponseEntity.status(HttpStatus.OK).body("Dados salvos com sucesso!");
         } catch (IOException e) {
@@ -50,8 +53,4 @@ public class PDFController {
         }
     }
 
-    @GetMapping("/teste")
-    public ResponseEntity<String> testeConexao() {
-        return ResponseEntity.status(HttpStatus.OK).body("API funcionando corretamente.");
-    }
 }

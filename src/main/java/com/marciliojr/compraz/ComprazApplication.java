@@ -14,8 +14,6 @@ public class ComprazApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ComprazApplication.class, args);
-
-
     }
 
 }
