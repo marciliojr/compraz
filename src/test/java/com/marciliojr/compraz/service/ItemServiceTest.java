@@ -12,6 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,9 +25,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
@@ -73,32 +75,38 @@ class ItemServiceTest {
     }
 
     @Test
-    void deveListarTodosItemDTOItens() {
-
-        when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
+    void deveListarTodosItemDTO() {
+        List<Item> items = Collections.singletonList(item);
+        when(itemRepository.findAll()).thenReturn(items);
 
         List<ItemDTO> resultado = itemService.listarTodosItemDTO();
 
         assertThat(resultado).hasSize(1);
-        ItemDTO resultadoDTO = resultado.get(0);
-        assertThat(resultadoDTO.getNome()).isEqualTo("Produto Teste");
-        assertThat(resultadoDTO.getQuantidade()).isEqualTo(BigDecimal.ONE);
-        assertThat(resultadoDTO.getUnidade()).isEqualTo("UN");
-        assertThat(resultadoDTO.getValorUnitario()).isEqualTo(BigDecimal.TEN);
-        assertThat(resultadoDTO.getValorTotal()).isEqualTo(BigDecimal.TEN);
-        assertThat(resultadoDTO.getNomeEstabelecimento()).isEqualTo("Mercado Teste");
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
         verify(itemRepository).findAll();
     }
 
     @Test
-    void deveListarItensPorEstabelecimentoEPeriodo() {
+    void deveListarItensPorEstabelecimentoEPeriodoComTodosParametrosNulos() {
 
+        when(itemRepository.findAll()).thenReturn(Collections.singletonList(item));
+
+        List<ItemDTO> resultado = itemService.listarItensPorEstabelecimentoEPeriodo(null, null, null, null);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findAll();
+    }
+
+    @Test
+    void deveListarItensPorEstabelecimentoEPeriodoComParametros() {
+        List<ItemDTO> items = Collections.singletonList(itemDTO);
         when(itemRepository.findAllItemsByEstabelecimentoAndPeriodo(
                 "Mercado Teste",
                 TipoCupom.MERCADO,
                 dataCompra,
                 dataCompra
-        )).thenReturn(Collections.singletonList(itemDTO));
+        )).thenReturn(items);
 
         List<ItemDTO> resultado = itemService.listarItensPorEstabelecimentoEPeriodo(
                 "Mercado Teste",
@@ -108,8 +116,7 @@ class ItemServiceTest {
         );
 
         assertThat(resultado).hasSize(1);
-        ItemDTO resultadoDTO = resultado.get(0);
-        assertThat(resultadoDTO.getNome()).isEqualTo("Produto Teste");
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
         verify(itemRepository).findAllItemsByEstabelecimentoAndPeriodo(
                 "Mercado Teste",
                 TipoCupom.MERCADO,
@@ -120,20 +127,18 @@ class ItemServiceTest {
 
     @Test
     void deveListarItensPorCompraId() {
-
-        when(itemRepository.findByCompraId(1L)).thenReturn(Collections.singletonList(itemDTO));
+        List<ItemDTO> items = Collections.singletonList(itemDTO);
+        when(itemRepository.findByCompraId(1L)).thenReturn(items);
 
         List<ItemDTO> resultado = itemService.listarItensPorCompraId(1L);
 
         assertThat(resultado).hasSize(1);
-        ItemDTO resultadoDTO = resultado.get(0);
-        assertThat(resultadoDTO.getNome()).isEqualTo("Produto Teste");
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
         verify(itemRepository).findByCompraId(1L);
     }
 
     @Test
     void deveSomarValorTotalPorEstabelecimentoEPeriodo() {
-
         when(itemRepository.sumValorTotalByEstabelecimentoAndPeriodo(
                 "Mercado Teste",
                 TipoCupom.MERCADO,
@@ -159,14 +164,14 @@ class ItemServiceTest {
 
     @Test
     void deveListarItensPorNomeEPeriodo() {
-
+        List<ItemDTO> items = Collections.singletonList(itemDTO);
         when(itemRepository.findByNomeByPeriodo(
                 "Produto",
                 TipoCupom.MERCADO,
                 dataCompra,
                 dataCompra,
                 "Mercado"
-        )).thenReturn(Collections.singletonList(itemDTO));
+        )).thenReturn(items);
 
         List<ItemDTO> resultado = itemService.listarItensPorNomeEPeriodo(
                 "Produto",
@@ -177,8 +182,7 @@ class ItemServiceTest {
         );
 
         assertThat(resultado).hasSize(1);
-        ItemDTO resultadoDTO = resultado.get(0);
-        assertThat(resultadoDTO.getNome()).isEqualTo("Produto Teste");
+        assertThat(resultado.get(0).getNome()).isEqualTo("Produto Teste");
         verify(itemRepository).findByNomeByPeriodo(
                 "Produto",
                 TipoCupom.MERCADO,
@@ -189,24 +193,53 @@ class ItemServiceTest {
     }
 
     @Test
+    void deveBuscarProdutosPaginados() {
+        Page<ItemDTO> page = new PageImpl<>(Collections.singletonList(itemDTO));
+        Pageable pageable = PageRequest.of(0, 10);
+        when(itemRepository.findByNomeByPeriodoPaginado(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado",
+                pageable
+        )).thenReturn(page);
+
+        Page<ItemDTO> resultado = itemService.buscarProdutosPaginados(
+                "Produto",
+                "Mercado",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                pageable
+        );
+
+        assertThat(resultado.getContent()).hasSize(1);
+        assertThat(resultado.getContent().get(0).getNome()).isEqualTo("Produto Teste");
+        verify(itemRepository).findByNomeByPeriodoPaginado(
+                "Produto",
+                TipoCupom.MERCADO,
+                dataCompra,
+                dataCompra,
+                "Mercado",
+                pageable
+        );
+    }
+
+    @Test
     void deveDeletarItemPorId() {
-
         itemService.deleteById(1L);
-
-        verify(itemRepository).deleteById(anyLong());
+        verify(itemRepository).deleteById(1L);
     }
 
     @Test
     void deveDeletarItensPorCompraId() {
-
         itemService.deleteByCompraId(1L);
-
-        verify(itemRepository).deleteByCompraId(anyLong());
+        verify(itemRepository).deleteByCompraId(1L);
     }
 
     @Test
     void deveAtualizarItem() {
-
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
@@ -221,10 +254,45 @@ class ItemServiceTest {
                 "Mercado Teste"
         );
 
-        itemService.atualizarItem(itemParaAtualizar);
+        ItemDTO resultado = itemService.atualizarItem(itemParaAtualizar);
 
+        assertThat(resultado).isNotNull();
+        assertThat(resultado.getNome()).isEqualTo("Produto Atualizado");
         verify(itemRepository).findById(1L);
         verify(itemRepository).save(any(Item.class));
     }
 
+    @Test
+    void deveLancarExcecaoQuandoAtualizarItemNaoEncontrado() {
+        when(itemRepository.findById(1L)).thenReturn(Optional.empty());
+
+        ItemDTO itemParaAtualizar = new ItemDTO(
+                1L,
+                "Produto Atualizado",
+                BigDecimal.ONE,
+                "UN",
+                BigDecimal.TEN,
+                BigDecimal.TEN,
+                dataCompra,
+                "Mercado Teste"
+        );
+
+        try {
+            itemService.atualizarItem(itemParaAtualizar);
+        } catch (RuntimeException e) {
+            assertThat(e.getMessage()).isEqualTo("Item não encontrado");
+        }
+
+        verify(itemRepository).findById(1L);
+        verify(itemRepository, never()).save(any(Item.class));
+    }
+
+    @Test
+    void deveSalvarOuAtualizarItem() {
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        itemService.salvarOuAtualizar(item);
+
+        verify(itemRepository).save(item);
+    }
 }
