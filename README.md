@@ -1,62 +1,80 @@
 # 🛒 Compraz - Sistema de Gestão de Cupons Fiscais
 
-O **Compraz** é um sistema para gerenciar notas fiscais e compras realizadas em estabelecimentos. Ele permite extrair dados de cupons fiscais em PDF, armazená-los em um banco de dados e consultá-los através de uma API REST.
+## 📝 Descrição
+Compraz é uma aplicação web desenvolvida em Spring Boot para gerenciamento de compras mensais. O sistema permite o controle e organização de compras, oferecendo uma interface RESTful para gerenciar os dados de forma eficiente.
 
-## 📌 Funcionalidades
+## 🚀 Tecnologias Utilizadas
+- Java 17
+- Spring Boot 3.4.0
+- Spring Data JPA
+- MariaDB
+- Lombok
+- OpenAPI/Swagger
+- iText (Manipulação de PDFs)
+- PDFBox
+- Jsoup
 
-- 📂 Upload de cupons fiscais em PDF e extração de dados;
-- 📊 Armazenamento de compras, estabelecimentos e itens no banco de dados;
-- 🔎 Consultas por período e estabelecimento;
-- 🏪 Cadastro e gerenciamento de estabelecimentos;
-- 📄 API REST para acesso e consulta de dados.
+## 🛠️ Pré-requisitos
+- Java JDK 17 ou superior
+- Maven 3.6.0 ou superior
+- MariaDB (para ambiente de produção)
+- H2 Database (para testes)
 
-## 🏗️ Arquitetura do Projeto
+## ⚙️ Configuração do Ambiente
 
-O projeto segue uma **arquitetura em camadas**, utilizando **Spring Boot** e **JPA**. As principais camadas são:
+### Instalação
+1. Clone o repositório
+```bash
+git clone https://github.com/marciliojr/compraz.git
+```
 
-- **Model**: Representação das entidades `Compra`, `Estabelecimento` e `Item`.
-- **DTO**: Objetos de transferência de dados (`ItemDTO`).
-- **Repository**: Interfaces para acesso ao banco de dados com Spring Data JPA.
-- **Service**: Regras de negócio e processamento de dados dos cupons fiscais.
-- **Controller**: Exposição de endpoints REST.
-
-
-## 🛠️ Tecnologias Utilizadas
-
-- **Java 17**
-- **Spring Boot 3+**
-- **Spring Data JPA**
-- **Hibernate**
-- **Apache PDFBox** (extração de texto de PDFs)
-- **Maven** (gerenciamento de dependências)
-- **Banco de Dados H2/MariaDB** (configuração ajustável)
-
-## 🚀 Como Executar o Projeto
-
-### 1️⃣ Clonar o Repositório
-
-```sh
-git clone https://github.com/seu-usuario/compraz.git
+2. Navegue até o diretório do projeto
+```bash
 cd compraz
+```
 
-2️⃣ Configurar o Banco de Dados
-Defina as configurações do banco de dados no arquivo application.properties:
+3. Execute o projeto
+```bash
+./mvnw spring-boot:run
+```
 
-spring.datasource.url=jdbc:h2:mem:compraz
-spring.datasource.username=sa
-spring.datasource.password=
-spring.jpa.hibernate.ddl-auto=update
+### Configuração do Banco de Dados
+O projeto utiliza MariaDB como banco de dados principal e H2 para testes. As configurações do banco de dados podem ser ajustadas no arquivo `application.properties`.
 
-3️⃣ Construir e Rodar a Aplicação
-mvn clean install
-mvn spring-boot:run
+## 📚 Documentação da API
+A documentação da API está disponível através do Swagger UI em http://localhost:sua_porta/swagger-ui.html
 
-📝 Melhorias Futuras
-📌 Integração com APIs de consulta de notas fiscais eletrônicas (NFC-e).
-📊 Dashboard interativo para visualização de gastos.
-📱 Aplicação mobile para consulta rápida de compras.
-🤝 Contribuições
-Fique à vontade para contribuir com melhorias! Faça um fork do repositório, crie uma branch com suas alterações e envie um pull request. 🚀
+## 🏗️ Estrutura do Projeto
+src/main/java/com/marciliojr/compraz/
+├── controller/ # Controladores REST
+├── service/ # Lógica de negócios
+├── repository/ # Camada de acesso a dados
+├── model/ # Entidades e DTOs
+└── infra/ # Configurações e utilitários
 
-📌 Desenvolvido por Marcíliojr
-📧 Entre em contato: @marciliojr
+
+## 🔧 Funcionalidades Principais
+- Gerenciamento de compras mensais
+- Geração de relatórios em PDF
+- API RESTful documentada
+- Validação de dados
+- Suporte a HATEOAS
+
+## �� Testes
+Para executar os testes do projeto:
+```bash
+./mvnw test
+```
+
+## 📦 Build
+Para gerar o arquivo JAR executável:
+```bash
+./mvnw clean package
+```
+
+## 📄 Licença
+Este projeto está sob a licença  MIT license.
+
+## ✒️ Autor
+Marcilio Jr - @marciliojr
+---
