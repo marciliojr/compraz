@@ -5,6 +5,7 @@ import com.marciliojr.compraz.model.Estabelecimento;
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.TipoCupom;
 import com.marciliojr.compraz.model.dto.CompraDTO;
+import com.marciliojr.compraz.model.dto.CompraRelatorioDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,5 +113,40 @@ class CompraRepositoryTest {
                 "Estabelecimento Inexistente", LocalDate.now());
 
         assertThat(compraEncontrada).isEmpty();
+    }
+
+    @Test
+    void deveBuscarRelatorioPorPeriodo() {
+        List<CompraRelatorioDTO> relatorio = compraRepository.findRelatorioByDataCompra(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+        );
+
+        assertThat(relatorio).hasSize(1);
+        CompraRelatorioDTO relatorioDTO = relatorio.get(0);
+        assertThat(relatorioDTO.getNomeEstabelecimento()).isEqualTo("Mercado Teste");
+        assertThat(relatorioDTO.getValorTotal().intValue()).isEqualTo(BigDecimal.TEN.intValue());
+    }
+
+    @Test
+    void deveRetornarListaVaziaQuandoNaoEncontrarRelatorioNoPeriodo() {
+        List<CompraRelatorioDTO> relatorio = compraRepository.findRelatorioByDataCompra(
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(2)
+        );
+
+        assertThat(relatorio).isEmpty();
+    }
+
+    @Test
+    void deveVerificarSeExisteCompraPorEstabelecimento() {
+        Boolean existe = compraRepository.existsByEstabelecimentoId(estabelecimento.getId());
+        assertThat(existe).isTrue();
+    }
+
+    @Test
+    void deveRetornarFalseQuandoNaoExisteCompraPorEstabelecimento() {
+        Boolean existe = compraRepository.existsByEstabelecimentoId(999L);
+        assertThat(existe).isFalse();
     }
 } 

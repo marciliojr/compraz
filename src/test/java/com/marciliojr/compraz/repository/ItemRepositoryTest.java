@@ -9,6 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -66,7 +69,6 @@ class ItemRepositoryTest {
 
     @Test
     void deveBuscarItensPorEstabelecimentoEPeriodo() {
-
         List<ItemDTO> itens = itemRepository.findAllItemsByEstabelecimentoAndPeriodo(
                 "Mercado Teste",
                 TipoCupom.MERCADO,
@@ -86,7 +88,6 @@ class ItemRepositoryTest {
 
     @Test
     void deveRetornarListaVaziaQuandoNaoEncontrarItens() {
-
         List<ItemDTO> itens = itemRepository.findAllItemsByEstabelecimentoAndPeriodo(
                 "Estabelecimento Inexistente",
                 TipoCupom.MERCADO,
@@ -99,7 +100,6 @@ class ItemRepositoryTest {
 
     @Test
     void deveSomarValorTotalPorEstabelecimentoEPeriodo() {
-
         BigDecimal valorTotal = itemRepository.sumValorTotalByEstabelecimentoAndPeriodo(
                 "Mercado Teste",
                 TipoCupom.MERCADO,
@@ -112,7 +112,6 @@ class ItemRepositoryTest {
 
     @Test
     void deveBuscarItensPorNomeEPeriodo() {
-
         List<ItemDTO> itens = itemRepository.findByNomeByPeriodo(
                 "Produto",
                 TipoCupom.MERCADO,
@@ -129,7 +128,6 @@ class ItemRepositoryTest {
 
     @Test
     void deveBuscarItensPorCompraId() {
-
         List<ItemDTO> itens = itemRepository.findByCompraId(compra.getId());
 
         assertThat(itens).hasSize(1);
@@ -140,10 +138,50 @@ class ItemRepositoryTest {
 
     @Test
     void deveDeletarItensPorCompraId() {
-
         itemRepository.deleteByCompraId(compra.getId());
         List<ItemDTO> itens = itemRepository.findByCompraId(compra.getId());
 
         assertThat(itens).isEmpty();
     }
-} 
+
+    @Test
+    void deveBuscarItensPorNomeEPeriodoPaginado() {
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("nome").ascending());
+
+        Page<ItemDTO> itens = itemRepository.findByNomeByPeriodoPaginado(
+                "Produto",
+                TipoCupom.MERCADO,
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1),
+                "Mercado",
+                pageRequest
+        );
+
+        assertThat(itens.getContent()).hasSize(1);
+        ItemDTO itemDTO = itens.getContent().get(0);
+        assertThat(itemDTO.getNome()).isEqualTo("Produto Teste");
+        assertThat(itemDTO.getNomeEstabelecimento()).isEqualTo("Mercado Teste");
+        assertThat(itens.getTotalElements()).isEqualTo(1);
+        assertThat(itens.getTotalPages()).isEqualTo(1);
+    }
+
+    @Test
+    void deveRetornarPaginaVaziaQuandoNaoEncontrarItensPaginados() {
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by("nome").ascending());
+
+        Page<ItemDTO> itens = itemRepository.findByNomeByPeriodoPaginado(
+                "Produto Inexistente",
+                TipoCupom.MERCADO,
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1),
+                "Mercado",
+                pageRequest
+        );
+
+        assertThat(itens.getContent()).isEmpty();
+        assertThat(itens.getTotalElements()).isEqualTo(0);
+        assertThat(itens.getTotalPages()).isEqualTo(0);
+    }
+
+
+}

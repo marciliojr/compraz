@@ -6,7 +6,6 @@ import com.marciliojr.compraz.repository.EstabelecimentoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -25,13 +24,17 @@ class EstabelecimentoServiceTest {
     @Mock
     private EstabelecimentoRepository estabelecimentoRepository;
 
-    @InjectMocks
+    @Mock
+    private CompraService compraService;
+
     private EstabelecimentoService estabelecimentoService;
 
     private Estabelecimento estabelecimento;
 
     @BeforeEach
     void setUp() {
+        estabelecimentoService = new EstabelecimentoService(estabelecimentoRepository, compraService);
+
         estabelecimento = new Estabelecimento();
         estabelecimento.setId(1L);
         estabelecimento.setNomeEstabelecimento("Mercado Teste");
@@ -40,19 +43,20 @@ class EstabelecimentoServiceTest {
 
     @Test
     void deveListarTodosEstabelecimentos() {
-
         List<Estabelecimento> estabelecimentos = Collections.singletonList(estabelecimento);
-        when(estabelecimentoRepository.findAllEstabelecimento()).thenReturn(estabelecimentos);
+        when(estabelecimentoRepository.findAll()).thenReturn(estabelecimentos);
 
         List<Estabelecimento> resultado = estabelecimentoService.listarTodos();
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getNomeEstabelecimento()).isEqualTo("Mercado Teste");
-        verify(estabelecimentoRepository).findAllEstabelecimento();
+        verify(estabelecimentoRepository).findAll();
     }
 
     @Test
     void deveRemoverEstabelecimento() {
+        when(compraService.existeComprasPorEstabelecimento(1L))
+                .thenReturn(false);
 
         estabelecimentoService.removerEstabelecimento(1L);
 
@@ -61,7 +65,6 @@ class EstabelecimentoServiceTest {
 
     @Test
     void deveObterEstabelecimentoPorNome() {
-
         when(estabelecimentoRepository.findByNomeEstabelecimento("Mercado Teste"))
                 .thenReturn(Optional.of(estabelecimento));
 
@@ -74,7 +77,6 @@ class EstabelecimentoServiceTest {
 
     @Test
     void deveRetornarVazioQuandoNaoEncontrarEstabelecimento() {
-
         when(estabelecimentoRepository.findByNomeEstabelecimento("Estabelecimento Inexistente"))
                 .thenReturn(Optional.empty());
 
@@ -83,4 +85,4 @@ class EstabelecimentoServiceTest {
         assertThat(resultado).isEmpty();
         verify(estabelecimentoRepository).findByNomeEstabelecimento("Estabelecimento Inexistente");
     }
-} 
+}

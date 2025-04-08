@@ -88,19 +88,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             Pageable pageable);
 
 
-    @Query("SELECT new com.marciliojr.compraz.model.dto.ItemDTO(" +
-            "i.id, i.nome, i.quantidade, i.unidade, i.valorTotal, i.valorUnitario, " +
-            "c.dataCompra, e.nomeEstabelecimento) " +
-            "FROM Item i " +
-            "JOIN i.compra c " +
-            "JOIN c.estabelecimento e " +
-            "WHERE (:nome IS NULL OR LOWER(i.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) " +
-            "AND (:tipoCupom IS NULL OR e.tipoCupom = :tipoCupom) " +
-            "AND (:dataInicio IS NULL OR c.dataCompra >= :dataInicio) " +
-            "AND (:dataFim IS NULL OR c.dataCompra <= :dataFim)" +
-            "AND (:nomeEstabelecimento IS NULL OR LOWER(e.nomeEstabelecimento) LIKE LOWER(CONCAT('%', :nomeEstabelecimento, '%')))")
-    List<ItemDTO> findByNomeAndEstabelecimentoByPeriodo(@Param("nome") String nome, @Param("tipoCupom") TipoCupom tipoCupom, @Param("dataInicio") LocalDate dataInicio, @Param("dataFim") LocalDate dataFim);
-
     void deleteById(Long id);
 
     @Modifying
