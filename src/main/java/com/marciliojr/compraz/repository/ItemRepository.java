@@ -87,7 +87,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             @Param("nomeEstabelecimento") String nomeEstabelecimento,
             Pageable pageable);
 
-
     void deleteById(Long id);
 
     @Modifying
@@ -105,5 +104,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "ORDER BY i.nome")
     List<ItemDTO> findByCompraId(@Param("compraId") Long compraId);
 
+    List<Item> findByCompraDataCompraBetween(LocalDate dataInicio, LocalDate dataFim);
 
 }
