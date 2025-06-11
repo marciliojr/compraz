@@ -1,6 +1,7 @@
 package com.marciliojr.compraz.controller;
 
 import com.marciliojr.compraz.model.dto.RelatorioItemDTO;
+import com.marciliojr.compraz.model.dto.TopProdutosDTO;
 import com.marciliojr.compraz.service.RelatorioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,5 +28,21 @@ public class RelatorioController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
         List<RelatorioItemDTO> relatorio = relatorioService.gerarRelatorioItensAgrupados(dataInicio, dataFim);
         return ResponseEntity.ok(relatorio);
+    }
+
+    /**
+     * Endpoint para gráfico de barras horizontais dos produtos mais comprados
+     * @param dataInicio Data inicial do período (obrigatório)
+     * @param dataFim Data final do período (obrigatório)
+     * @param limite Número máximo de produtos a retornar (opcional, padrão: 10)
+     * @return Lista dos top produtos ordenados por quantidade total
+     */
+    @GetMapping("/top-produtos")
+    public ResponseEntity<List<TopProdutosDTO>> gerarTopProdutosMaisComprados(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @RequestParam(required = false, defaultValue = "30") Integer limite) {
+        List<TopProdutosDTO> topProdutos = relatorioService.gerarTopProdutosMaisComprados(dataInicio, dataFim, limite);
+        return ResponseEntity.ok(topProdutos);
     }
 } 

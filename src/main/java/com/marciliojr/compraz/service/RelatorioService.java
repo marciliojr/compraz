@@ -2,6 +2,7 @@ package com.marciliojr.compraz.service;
 
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.dto.RelatorioItemDTO;
+import com.marciliojr.compraz.model.dto.TopProdutosDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,24 @@ public class RelatorioService {
                     return new RelatorioItemDTO(nomeNormalizado, quantidadeTotal, mediaPreco);
                 })
                 .sorted(Comparator.comparing(RelatorioItemDTO::getNomeItem))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gera relatório dos produtos mais comprados para exibição em gráfico de barras horizontais
+     * @param dataInicio Data inicial do período
+     * @param dataFim Data final do período
+     * @param limite Número máximo de produtos a retornar (top N produtos)
+     * @return Lista dos top produtos ordenados por quantidade total (decrescente), excluindo sacolas
+     */
+    public List<TopProdutosDTO> gerarTopProdutosMaisComprados(LocalDate dataInicio, LocalDate dataFim, Integer limite) {
+        List<RelatorioItemDTO> relatorioCompleto = gerarRelatorioItensAgrupados(dataInicio, dataFim);
+        
+        return relatorioCompleto.stream()
+                .filter(item -> !item.getNomeItem().toLowerCase().contains("sacola")) // Exclui produtos que contenham "sacola"
+                .map(item -> new TopProdutosDTO(item.getNomeItem(), item.getQuantidadeTotal()))
+                .sorted(Comparator.comparing(TopProdutosDTO::getQuantidadeTotal).reversed())
+                .limit(limite != null ? limite : 10) // Padrão de 10 produtos se não especificado
                 .collect(Collectors.toList());
     }
 
