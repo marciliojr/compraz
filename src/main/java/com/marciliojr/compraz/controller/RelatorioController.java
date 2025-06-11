@@ -2,6 +2,7 @@ package com.marciliojr.compraz.controller;
 
 import com.marciliojr.compraz.model.dto.RelatorioItemDTO;
 import com.marciliojr.compraz.model.dto.TopProdutosDTO;
+import com.marciliojr.compraz.model.dto.RelatorioComparativoDTO;
 import com.marciliojr.compraz.service.RelatorioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -44,5 +45,20 @@ public class RelatorioController {
             @RequestParam(required = false, defaultValue = "30") Integer limite) {
         List<TopProdutosDTO> topProdutos = relatorioService.gerarTopProdutosMaisComprados(dataInicio, dataFim, limite);
         return ResponseEntity.ok(topProdutos);
+    }
+
+    /**
+     * Endpoint para relatório comparativo de preços de produtos
+     * Compara preços de todos os produtos entre estabelecimentos no período especificado vs período anterior
+     * @param dataInicio Data inicial do período (obrigatório)
+     * @param dataFim Data final do período (obrigatório)
+     * @return Lista de relatórios comparativos para todos os produtos do período
+     */
+    @GetMapping("/comparativo-precos")
+    public ResponseEntity<List<RelatorioComparativoDTO>> gerarRelatorioComparativoPrecos(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
+        List<RelatorioComparativoDTO> relatorio = relatorioService.gerarRelatorioComparativoPrecos(dataInicio, dataFim);
+        return ResponseEntity.ok(relatorio);
     }
 } 

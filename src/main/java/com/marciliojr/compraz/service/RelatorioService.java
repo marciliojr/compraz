@@ -3,6 +3,7 @@ package com.marciliojr.compraz.service;
 import com.marciliojr.compraz.model.Item;
 import com.marciliojr.compraz.model.dto.RelatorioItemDTO;
 import com.marciliojr.compraz.model.dto.TopProdutosDTO;
+import com.marciliojr.compraz.model.dto.RelatorioComparativoDTO;
 import com.marciliojr.compraz.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,5 +151,91 @@ public class RelatorioService {
         mapeamentoGrupos.put("eva", "EVA");
 
         return mapeamentoGrupos.getOrDefault(primeiraPalavra, nome);
+    }
+
+    /**
+     * Gera relatório comparativo de preços de todos os produtos entre estabelecimentos
+     * comparando mês atual com mês anterior
+     * @param dataInicio Data inicial do período para comparação
+     * @param dataFim Data final do período para comparação  
+     * @return Lista de relatórios comparativos para todos os produtos do período
+     */
+    public List<RelatorioComparativoDTO> gerarRelatorioComparativoPrecos(LocalDate dataInicio, LocalDate dataFim) {
+        // Calcula o período anterior com a mesma duração
+        long diasPeriodo = dataInicio.until(dataFim).getDays() + 1;
+        LocalDate dataInicioAnterior = dataInicio.minusDays(diasPeriodo);
+        LocalDate dataFimAnterior = dataInicio.minusDays(1);
+        
+        // Busca todos os itens do período atual
+        List<Item> itensPeriodoAtual = itemRepository.findByCompraDataCompraBetween(dataInicio, dataFim);
+        
+        // Busca todos os itens do período anterior
+        List<Item> itensPeriodoAnterior = itemRepository.findByCompraDataCompraBetween(dataInicioAnterior, dataFimAnterior);
+        
+        // Agrupa por nome normalizado para período atual
+        Map<String, List<Item>> itensAgrupadosPeriodoAtual = itensPeriodoAtual.stream()
+                .collect(Collectors.groupingBy(item -> normalizarNomeItem(item.getNome())));
+                
+        // Agrupa por nome normalizado para período anterior
+        Map<String, List<Item>> itensAgrupadosPeriodoAnterior = itensPeriodoAnterior.stream()
+                .collect(Collectors.groupingBy(item -> normalizarNomeItem(item.getNome())));
+        
+        // Obtém todos os nomes únicos dos dois períodos
+        Set<String> todosNomesItens = new HashSet<>();
+        todosNomesItens.addAll(itensAgrupadosPeriodoAtual.keySet());
+        todosNomesItens.addAll(itensAgrupadosPeriodoAnterior.keySet());
+        
+        // Gera relatório para cada item
+        return todosNomesItens.stream()
+                .map(nomeItem -> {
+                    List<Item> itensPeriodoAtualItem = itensAgrupadosPeriodoAtual.getOrDefault(nomeItem, new ArrayList<>());
+                    List<Item> itensPeriodoAnteriorItem = itensAgrupadosPeriodoAnterior.getOrDefault(nomeItem, new ArrayList<>());
+                    
+                    List<RelatorioComparativoDTO.ComparacaoEstabelecimentoDTO> comparacoesPeriodoAtual = 
+                            agruparPorEstabelecimento(itensPeriodoAtualItem);
+                            
+                    List<RelatorioComparativoDTO.ComparacaoEstabelecimentoDTO> comparacoesPeriodoAnterior = 
+                            agruparPorEstabelecimento(itensPeriodoAnteriorItem);
+                    
+                    return new RelatorioComparativoDTO(
+                            nomeItem,
+                            comparacoesPeriodoAtual,
+                            comparacoesPeriodoAnterior
+                    );
+                })
+                .filter(relatorio -> !relatorio.getComparacoesMesAtual().isEmpty() || !relatorio.getComparacoesMesAnterior().isEmpty())
+                .sorted(Comparator.comparing(RelatorioComparativoDTO::getNomeItem))
+                .collect(Collectors.toList());
+    }
+    
+    private List<RelatorioComparativoDTO.ComparacaoEstabelecimentoDTO> agruparPorEstabelecimento(List<Item> itens) {
+        Map<String, List<Item>> itensPorEstabelecimento = itens.stream()
+                .collect(Collectors.groupingBy(item -> item.getCompra().getEstabelecimento().getNomeEstabelecimento()));
+                
+        return itensPorEstabelecimento.entrySet().stream()
+                .map(entry -> {
+                    String estabelecimento = entry.getKey();
+                    List<Item> itensEstabelecimento = entry.getValue();
+                    
+                    BigDecimal precoMedio = itensEstabelecimento.stream()
+                            .map(Item::getValorUnitario)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                            .divide(new BigDecimal(itensEstabelecimento.size()), 2, RoundingMode.HALF_UP);
+                            
+                    BigDecimal quantidadeTotal = itensEstabelecimento.stream()
+                            .map(Item::getQuantidade)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                            
+                    Integer totalCompras = itensEstabelecimento.size();
+                    
+                    return new RelatorioComparativoDTO.ComparacaoEstabelecimentoDTO(
+                            estabelecimento,
+                            precoMedio,
+                            quantidadeTotal,
+                            totalCompras
+                    );
+                })
+                .sorted(Comparator.comparing(RelatorioComparativoDTO.ComparacaoEstabelecimentoDTO::getPrecoMedio))
+                .collect(Collectors.toList());
     }
 } 
